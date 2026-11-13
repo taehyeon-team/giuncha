@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=1682,user-scalable=no">
+<style>
+@font-face{font-family:'Do Hyeon';src:url(DoHyeon-Regular.ttf)}
+@font-face{font-family:'Jua';src:url(Jua-Regular.ttf)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--ink:#16130f;--cream:#fff4dc;--mint:#2ac1bc;--pink:#ff5c8a;--yel:#ffd43b;--org:#ff7a2f;--blue:#4d7cff;--grn:#3fc46b;--sil:#cfd6e2}
+html,body{width:100%;height:100%;overflow:hidden}
+body{background:var(--cream);color:var(--ink);font-family:'Jua',sans-serif;word-break:keep-all}
+#f{position:absolute;left:0;top:0;padding:110px 70px 60px;display:flex;flex-direction:column;justify-content:safe center;background:radial-gradient(circle at 20px 20px,rgba(22,19,15,.10) 3px,transparent 4px) 0 0/44px 44px,var(--cream)}
+.dh{font-family:'Do Hyeon',sans-serif;line-height:1}
+.box{border:5px solid var(--ink);border-radius:30px;box-shadow:10px 10px 0 var(--ink);background:#fff}
+.stk{display:inline-block;border:4px solid var(--ink);border-radius:14px;padding:6px 18px;font-size:28px;background:var(--yel);box-shadow:5px 5px 0 var(--ink)}
+.btn{border:5px solid var(--ink);border-radius:999px;box-shadow:7px 7px 0 var(--ink);padding:20px 0;text-align:center;font-size:36px;font-family:'Do Hyeon'}
+.btn:active,.tap:active{transform:translate(5px,5px);box-shadow:2px 2px 0 var(--ink)}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:26px;position:absolute;left:70px;right:70px;top:36px}
+.logo{font-family:'Do Hyeon';font-size:40px}
+.row{display:flex;gap:28px}
+.small{font-size:26px;opacity:.85}
+*{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+</style></head><body><div id="f"></div>
+<script>
+const go=a=>{try{Android.on(a)}catch(e){console.log(a)}};
+function mascot(el,s=200,mood){
+ const C={수:'#4d9dff',화:'#ff7a2f',목:'#3fc46b',금:'#dfe5ee',토:'#d99a5e'}[el]||'#dfe5ee';let b='';
+ if(el==='수')b=`<path d="M100 18 C 135 70,165 105,165 135 A65 65 0 0 1 35 135 C 35 105,65 70,100 18Z" fill="${C}" stroke="#16130f" stroke-width="7"/><ellipse cx="75" cy="105" rx="10" ry="18" fill="#fff" opacity=".7"/>`;
+ else if(el==='화')b=`<path d="M100 15 C 120 55,160 70,158 125 A58 58 0 0 1 42 125 C 40 95,62 85,70 55 C 80 80,92 70,100 15Z" fill="${C}" stroke="#16130f" stroke-width="7"/><path d="M100 95 C 112 115,125 120,122 140 A22 22 0 0 1 78 140 C 78 125,92 118,100 95Z" fill="#ffd43b"/>`;
+ else if(el==='목')b=`<rect x="45" y="85" width="110" height="95" rx="48" fill="${C}" stroke="#16130f" stroke-width="7"/><path d="M100 88 V40" stroke="#16130f" stroke-width="7"/><path d="M100 50 C 70 20,45 40,52 55 C 70 62,90 58,100 50Z" fill="${C}" stroke="#16130f" stroke-width="6"/><path d="M100 45 C 130 15,155 35,148 50 C 130 58,110 55,100 45Z" fill="${C}" stroke="#16130f" stroke-width="6"/>`;
+ else if(el==='토')b=`<path d="M30 160 C 25 110,55 70,100 70 C 150 70,178 110,170 160Z" fill="${C}" stroke="#16130f" stroke-width="7" stroke-linejoin="round"/>`;
+ else b=`<path d="M60 60 L140 60 L170 120 L140 175 L60 175 L30 120Z" fill="${C}" stroke="#16130f" stroke-width="7" stroke-linejoin="round"/><path d="M70 75 L95 75 L80 100Z" fill="#fff"/>`;
+ const e=mood==='cover'?`<path d="M60 120 h80" stroke="#16130f" stroke-width="22" stroke-linecap="round"/><text x="100" y="128" text-anchor="middle" font-size="16" fill="#fff" font-family="Do Hyeon">안 봐요</text>`:`<circle cx="80" cy="128" r="8" fill="#16130f"/><circle cx="120" cy="128" r="8" fill="#16130f"/><circle cx="83" cy="125" r="2.5" fill="#fff"/><circle cx="123" cy="125" r="2.5" fill="#fff"/><path d="M90 145 q10 10 20 0" stroke="#16130f" stroke-width="6" fill="none" stroke-linecap="round"/>`;
+ return `<svg width="${s}" height="${s}" viewBox="0 0 200 200">${b}<ellipse cx="66" cy="146" rx="10" ry="6" fill="#ff5c8a" opacity=".55"/><ellipse cx="134" cy="146" rx="10" ry="6" fill="#ff5c8a" opacity=".55"/>${e}</svg>`;
+}
+const BG={수:'#a9d4ff',화:'#ffc19a',목:'#a8e6b8',금:'var(--sil)',토:'#f0cfa6'};
+const WORD={수:'느긋한 날',화:'말 걸기 좋은 날',목:'새로 시작하는 날',금:'정리하는 날',토:'차근히 가는 날'};
+const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ANI=['쥐','소','호랑이','토끼','용','뱀','말','양','원숭이','닭','개','돼지'];
+const AEL=['수','토','목','목','토','화','화','토','금','금','토','수'];
+const NAME={목:'나무',화:'불',토:'흙',금:'쇠',수:'물'};
+const GEN={목:'화',화:'토',토:'금',금:'수',수:'목'};
+// 옆자리 조합 15종 — 좋은 이름만
+const COMBO={'목목':['숲길 동행','같이 자라는 사이','요즘 배우는 것 하나씩 말하기'],'화화':['불꽃 텐션','웃음이 두 배 되는 사이','한 곡 골라 같이 따라 부르기'],'토토':['든든 베이스캠프','말 안 해도 편한 사이','도착하면 뭐 먹을지 하나로 정하기'],'금금':['칼각 듀오','계획이 착착 맞는 사이','오늘 일정 순서 같이 정하기'],'수수':['잔잔한 라디오','이야기가 잘 통하는 사이','요즘 재미있게 본 것 하나 말하기'],
+ '목화':['수다 폭발','나무가 불을 키우는 사이 — 오늘 얘기 안 끊김','도착 전까지 웃긴 썰 하나씩'],'화토':['따끈한 밥상','불이 흙을 데우는 사이','맛집 하나 찍어 가기'],'토금':['보물찾기','흙 속에서 쇠가 빛나는 사이','서로 장점 하나 찾아 말해 주기'],'금수':['맑은 샘물','쇠에 맺힌 물처럼 맑아지는 사이','고마웠던 일 하나 말하기'],'수목':['새싹 응원단','물이 나무를 키우는 사이','상대 요즘 도전에 응원 한마디'],
+ '목토':['균형 정원사','달라서 균형 잡히는 사이','오늘 메뉴는 한 사람씩 양보'],'토수':['든든 방파제','출렁여도 잡아 주는 사이','서로 말 끝까지 들어 주기'],'수화':['온탕 냉탕','식혀 주고 데워 주는 사이 — 둘이 합치면 딱 36.5도','에어컨 온도, 둘이 합의 보기!'],'화금':['대장간 콤비','서로를 단련시키는 사이','부드럽게 솔직한 조언 하나'],'금목':['목수와 연장','다듬어 주는 사이','같이 할 작은 계획 하나 세우기']};
+function combo(a,b){return COMBO[a+b]||COMBO[b+a];}
+const hdr=(l,r)=>`<div class="top"><span><span class="logo">기운차</span> <span style="opacity:.6">· ${l}</span></span>${r?`<span class="stk" style="background:var(--mint);font-size:24px">${r}</span>`:''}</div>`;
+const EMO={좋았어요:'var(--yel)',뿌듯해요:'var(--grn)',괜찮아요:'var(--mint)','생각이 많아요':'var(--sil)',짜증나요:'var(--org)',불안해요:'var(--blue)',우울해요:'#c8c2d6'};
+const V={
+ morning:d=>{const el=d.element||'금',spicy=d.tone==='매운맛';
+  if(d.rest) return `${hdr(d.date,'함께한 지 '+d.count+'일째')}<div class="box" style="background:#fff;padding:60px"><div class="dh" style="font-size:120px">오늘은 쉬어 가요</div><div style="font-size:44px;margin-top:30px">${d.line}</div>${d.help?`<div style="font-size:36px;margin-top:18px">${d.help}</div>`:''}<div class="row" style="margin-top:40px"><div class="btn tap" style="flex:1.2;background:var(--yel);font-size:32px" onclick="go('help')">${d.help?'접기':'힘들 땐 전화할 곳'}</div>${d.passenger?'':`<div class="btn tap" style="flex:.6;background:#fff;font-size:30px" onclick="go('gate')">내 기록 🔒</div>`}<div class="btn tap" id="solo" style="flex:.7;background:#fff;font-size:28px">${d.soloLong?'혼자예요 (길게 꾹~)':d.soloLabel}</div><div class="btn tap" style="flex:.45;background:#eee;font-size:30px" onclick="go('settings')">설정</div></div></div>`;
+  return `${hdr(d.date,'함께한 지 '+d.count+'일째')}
+  <div class="row" style="align-items:stretch">
+   <div class="box" style="flex:1.55;background:${BG[el]};padding:40px 48px;position:relative;min-height:470px">
+    <span class="stk" style="background:var(--pink);color:var(--ink);transform:rotate(-4deg)">${d.yday||'오늘의 기운 배달 완료!'}</span>
+    <div class="dh" style="font-size:120px;margin-top:24px">${WORD[el]}</div>
+    <div style="font-size:40px;margin-top:22px;line-height:1.3;max-width:560px">${spicy?d.spicy:d.line}</div>
+    <div style="position:absolute;right:26px;bottom:20px;transform:rotate(-6deg)">${mascot(el,220)}</div>
+    <div class="box" style="position:absolute;right:220px;top:50px;padding:12px 20px;font-size:28px">오늘은 ${NAME[el]}${({흙:'이',불:'이',물:'이'})[NAME[el]]||'가'} 왔다!</div>
+   </div>
+   <div style="flex:1;display:flex;flex-direction:column;gap:30px">
+    <div class="box" style="background:var(--mint);padding:30px 34px;flex:1"><div style="font-size:26px;opacity:.8">오늘 할 일 하나</div><div class="dh" style="font-size:50px;margin-top:8px;line-height:1.15">${d.action}</div></div>
+    <div class="box" style="background:#fff;padding:30px 34px"><div style="font-size:26px;opacity:.8">기운의 방향 · 색</div><div class="dh" style="font-size:48px;margin-top:8px">${d.direction}쪽 · ${d.colorName}</div>
+     <div class="row" style="gap:12px;margin-top:14px"><span class="stk tap" style="font-size:30px;padding:12px 28px;background:${spicy?'var(--org)':'var(--yel)'}" onclick="go('tone')">${spicy?'매운맛 🌶 → 순한맛으로':'순한맛 → 매운맛으로'}</span></div></div>
+   </div></div>
+  <div class="row" style="margin-top:34px"><div class="btn tap" style="flex:1.2;background:var(--yel)" onclick="go('more')">더 알려 줘</div>${d.passenger?'':`<div class="btn tap" style="flex:.7;background:#fff;font-size:30px" onclick="go('gate')">내 기록 🔒</div>`}<div class="btn tap" id="solo" style="flex:.8;background:#fff;font-size:28px">${d.soloLong?'혼자예요 (길게 꾹~)':d.soloLabel}</div><div class="btn tap" style="flex:.5;background:#eee;font-size:30px" onclick="go('settings')">설정</div></div>`},
+ checkin:d=>`${hdr('퇴근 주차 · 혼자 탑승','함께한 지 '+d.count+'일째')}
+  <div style="display:flex;align-items:center;gap:30px"><div class="dh" style="font-size:116px">오늘 하루, 한 단어로!</div>${mascot('수',140)}</div>
+  <div style="font-size:34px;opacity:.75;margin-top:6px">별점 말고 한 단어만. 내일 아침 색깔이 돼요.</div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:30px;margin-top:40px">${d.emotions.map((a,i)=>`<div class="box tap" onclick="go('emo:${a}')" style="background:${EMO[a]};padding:34px 30px;transform:rotate(${[-2,1.5,-1,2,-1.5,1,-2][i%7]}deg)"><div class="dh" style="font-size:${a.length>5?46:56}px">${a}</div></div>`).join('')}<div class="box tap" onclick="go('ok')" style="background:#fff;padding:34px 30px;display:flex;align-items:center;justify-content:center"><div style="font-size:32px;opacity:.6">오늘은 넘어갈게요</div></div></div>
+  <div class="small" style="margin-top:30px">혼자일 때만 열려요 · 동승자가 있으면 이 화면은 안 나와요 · 기록은 차 안에만</div>
+  <div class="row" style="margin-top:18px"><div class="btn tap" id="solo" style="flex:0 0 380px;background:#fff;font-size:28px">${d.soloLong?'혼자예요 (길게 꾹~)':d.soloLabel}</div></div>`,
+ reply:d=>`${hdr('퇴근 주차','')}
+  <div class="row" style="align-items:center"><div style="flex:1.3"><span class="stk" style="background:${EMO[d.tag]||'#fff'}">${d.tag}</span> <span class="stk" style="background:#fff;font-size:28px">✓ 저장했어요</span>
+   <div class="dh" style="font-size:96px;margin-top:30px;line-height:1.1">${d.empathy}</div>
+   ${d.next?`<div style="font-size:40px;margin-top:26px">${d.next}</div>`:''}
+   <div class="row" style="margin-top:40px"><div class="btn tap" style="flex:1.3;background:var(--yel)" onclick="go('ok')">내일 아침에 만나요!</div><div class="btn tap" style="flex:.7;background:#fff;font-size:30px" onclick="go('redo')">다시 고를게요</div></div></div>
+   <div style="flex:1;text-align:center">${mascot(d.nextEl||'수',380)}<div class="stk" style="margin-top:10px">내일의 기운 · ${NAME[d.nextEl]||'그대로'}</div></div></div>`,
+ pick:d=>`${hdr('둘이 탑승!','조합 도감 '+d.dex+'/15')}
+  <div style="display:flex;align-items:center;gap:26px"><div class="dh" style="font-size:92px">옆자리 띠, 재미로 골라 볼래요?</div>${mascot('화',140)}</div>
+  <div style="font-size:32px;opacity:.75;margin-top:8px">생일은 안 물어봐요 · 오늘만 쓰고 저장 안 해요</div>
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:24px;margin-top:40px">${ANI.map((a,i)=>`<div class="box tap" onclick="go('pick:${i}')" style="padding:30px 0;text-align:center;background:${BG[AEL[i]]};transform:rotate(${(i%3-1)*1.5}deg)"><div class="dh" style="font-size:52px">${a}</div></div>`).join('')}</div>
+  <div class="row" style="margin-top:36px"><div class="btn tap" style="flex:1;background:#fff;font-size:30px" onclick="go('ok')">오늘은 그냥 갈래요</div></div>`,
+ combo:d=>{const a=d.me.el,b=AEL[d.partner],c=combo(a,b);
+  return `${hdr('둘이 탑승!','조합 도감 '+d.dex+'/15')}
+  <div style="display:flex;align-items:center;justify-content:center;gap:26px">
+   <div style="text-align:center">${mascot(a,200)}<div style="margin-top:8px"><span class="stk" style="background:var(--mint)">나 · ${NAME[a]}</span></div></div>
+   <div class="dh" style="font-size:110px">+</div>
+   <div style="text-align:center">${mascot(b,200)}<div style="margin-top:8px"><span class="stk" style="background:var(--org)">옆자리 · ${NAME[b]} ${ANI[d.partner]}</span></div></div>
+   <div class="dh" style="font-size:110px">=</div>
+   <div class="box" style="background:var(--pink);color:var(--ink);padding:30px 38px;transform:rotate(-3deg);max-width:600px"><div style="font-size:30px">조합 탄생!</div><div class="dh" style="font-size:110px;margin-top:6px">${c[0]}</div><div style="font-size:32px;margin-top:10px">${c[1]}</div></div></div>
+  <div class="box" style="background:var(--yel);padding:28px 36px;margin-top:40px"><div style="font-size:26px;opacity:.75">오늘 할 일 하나 🎯</div><div class="dh" style="font-size:56px;margin-top:6px">${c[2]}</div></div>
+  <div class="row" style="margin-top:34px"><div class="btn tap" style="flex:1;background:var(--mint)" onclick="go('ok')">좋아요!</div></div>
+  <div class="small" style="margin-top:18px">"안 맞는 조합"은 없어요</div>`},
+ gate:d=>`${hdr('내 기록',d.passenger?'동승자 있음':'')}
+  <div class="row" style="align-items:center"><div style="flex:1.3">
+   <div class="dh" style="font-size:140px;line-height:1">잠깐!<br>${d.passenger?'기록은 혼자일<br>때만 열려요':'혼자 보는<br>기록이에요'}</div>
+   <div style="font-size:38px;margin-top:30px;line-height:1.4">${d.passenger?'옆에 누가 타고 있어요.':'마음 기록은 나만 보는 거라<br>한 번 더 물어볼게요.'}</div>
+   <div class="row" style="margin-top:40px">${d.passenger?'':`<div class="btn tap" id="open" style="flex:1;background:var(--yel);font-size:32px">혼자예요, 열기</div>`}<div class="btn tap" style="flex:1;background:#fff;font-size:32px" onclick="go('later')">${d.passenger?'돌아가기':'다음에 볼게요'}</div></div>
+  </div><div style="flex:1;display:flex;justify-content:center;transform:rotate(-5deg)">${mascot('수',420,'cover')}</div></div>`,
+ detail:d=>{const el=d.element||'금';
+  return `${hdr(d.date,'함께한 지 '+d.count+'일째')}
+  <div style="display:flex;align-items:center;gap:26px"><div class="dh" style="font-size:96px">${NAME[el]}의 기운, 더 알려 줄게!</div>${mascot(el,130)}</div>
+  <div class="box" style="background:#fff;padding:14px 44px;margin-top:30px">${[['옷',d.clothes],['갈 곳',d.place],['사람',d.person],['좋은 시간',d.goodTime]].map(([k,v],i)=>`<div style="display:flex;align-items:center;gap:30px;padding:24px 0;${i?'border-top:4px dashed rgba(22,19,15,.18)':''}"><span class="stk" style="background:${BG[el]};min-width:170px;text-align:center">${k}</span><span class="dh" style="font-size:46px;line-height:1.2">${v}</span></div>`).join('')}</div>
+  <div class="small" style="margin-top:22px">이렇게 골랐어요 — ${d.reason}</div>
+  <div class="row" style="margin-top:26px"><div class="btn tap" style="flex:1;background:var(--yel)" onclick="go('fold')">접기</div></div>`},
+ driving:d=>{const el=d.element||'금';
+  return `<div style="position:absolute;inset:0;background:#1b1d22"></div><div class="box" style="position:relative;background:#262a31;color:#fff;border-color:#444;box-shadow:none;padding:70px 80px;display:flex;align-items:center;gap:50px;min-height:560px">
+   <div style="flex:1">${d.alert?'<span class="stk" style="background:#3a3f48;color:#fff;border-color:#555;box-shadow:none">조심해서 지나가요</span>':''}<div style="font-family:'Jua',sans-serif;font-size:96px;margin-top:${d.alert?36:0}px;line-height:1.2">${esc(d.line)}</div></div>
+   <div style="transform:rotate(-6deg)">${mascot(el,330)}</div></div>`},
+ destiny:d=>{const el=d.element||'금';
+  return `${hdr('오늘의 데스티니','주말 · 처음 가는 곳')}
+  <div class="row" style="align-items:center"><div style="flex:1.35">
+   <span class="stk" style="background:var(--pink);color:var(--ink);transform:rotate(-3deg)">오늘의 데스티니!</span>
+   <div class="dh" style="font-size:150px;margin-top:26px;line-height:1.02">${esc(d.place)}</div>
+   <div style="font-size:44px;margin-top:28px">${d.same?`오늘 기운이 가리키는 ${d.direction}쪽 길이에요!`:`${d.dDir}쪽으로 가는 길이네요.`}</div>
+   <div style="font-size:34px;margin-top:14px;opacity:.8;line-height:1.35">${d.same?'마음 가는 대로, 천천히 다녀오세요.':`오늘 기운은 ${d.direction}쪽 — 돌아오는 길에 ${d.weekendPlace} 한 곳 들러 봐도 좋아요.`}</div>
+   <div class="row" style="margin-top:40px"><div class="btn tap" style="flex:1;background:var(--yel)" onclick="go('ok')">좋아요!</div></div></div>
+   <div style="flex:1;text-align:center">${mascot(el,340)}<div style="margin-top:8px"><span class="stk" style="background:var(--mint)">가는 길 · ${d.dDir}쪽</span> <span class="stk" style="background:#fff">오늘 기운 · ${d.direction}쪽</span></div></div></div>`},
+ week:d=>`${hdr('내 기록 · 지난 7일','함께한 지 '+d.count+'일째')}
+  <div class="dh" style="font-size:104px">타면 탈수록, 나를 알아가요!</div>
+  <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:20px;margin-top:38px">${d.days.map((x,i)=>`<div class="box" style="background:${BG[x.el]};padding:18px 6px 20px;text-align:center;transform:rotate(${[-2,1.5,-1,2,-1.5,1,-2][i]}deg)">${mascot(x.el,110)}<div style="font-size:26px;margin-top:2px">${x.w}</div><div class="dh" style="font-size:${x.tag.length>5?28:34}px;margin-top:6px">${x.tag}</div></div>`).join('')}</div>
+  <div class="box" style="background:var(--yel);padding:30px 38px;margin-top:40px"><div class="dh" style="font-size:46px;line-height:1.2">${d.s1}</div>${d.s2?`<div style="font-size:30px;margin-top:10px">${d.s2}</div>`:''}</div>
+  ${d.demo?'<div class="small" style="margin-top:18px">시연용 예시 기록 포함</div>':''}
+  <div class="row" style="margin-top:22px"><div class="btn tap" style="flex:1;background:#fff" onclick="go('later')">닫기</div></div>`,
+ hello:d=>`${hdr(d.bye?'오늘은 여기까지':'퇴근길','')}
+  <div class="row" style="align-items:center"><div style="flex:1.4"><div class="dh" style="font-size:118px;line-height:1.08">${d.msg1}</div><div style="font-size:44px;margin-top:30px;line-height:1.35">${d.msg2}</div>${d.canAsk?`<div class="row" style="margin-top:36px"><div class="btn tap" style="flex:1;background:var(--yel)" onclick="go('asknow')">지금 한 단어 남기기</div></div>`:''}<div class="row" style="margin-top:22px"><div class="btn tap" id="solo" style="flex:0 0 380px;background:#fff;font-size:28px">${d.soloLong?'혼자예요 (길게 꾹~)':d.soloLabel}</div><div class="btn tap" style="flex:0 0 200px;background:#eee;font-size:28px" onclick="go('settings')">설정</div></div></div>
+  <div style="flex:1;text-align:center;transform:rotate(5deg)">${mascot('수',360)}</div></div>`,
+ companion:d=>`${hdr('같이 타고 있어요','')}
+  <div class="row" style="align-items:center"><div style="flex:1.4"><div class="dh" style="font-size:130px;line-height:1.05">오늘은<br>같이 가는 날!</div><div style="font-size:44px;margin-top:26px">옆자리와 즐겁게 가세요.</div>
+  <div class="row" style="margin-top:40px"><div class="btn tap" style="flex:1.2;background:var(--yel)" onclick="go('pickgo')">옆자리 조합 보기</div><div class="btn tap" id="solo" style="flex:1;background:#fff;font-size:30px">${d.soloLong?'혼자예요 (길게 꾹~)':d.soloLabel}</div></div></div>
+  <div style="flex:1;text-align:center;transform:rotate(5deg)">${mascot('화',360)}</div></div>`,
+ mode:d=>'',
+};
+// 내용이 한 화면보다 길면(어제 얘기·첫날 인사가 붙는 날 등) 화면 틀을 조금 넓혀 그만큼 작게 그려서 한 화면에 다 들어가게 한다
+function fit(k){k=k||1;const f=document.getElementById('f');const z=Math.min(innerWidth/1682,innerHeight/1210)/k;f.style.width=(1682*k)+'px';f.style.height=(1210*k)+'px';f.style.transform='scale('+z+')';f.style.transformOrigin='0 0';}
+addEventListener('contextmenu',e=>e.preventDefault());
+function render(d){fit();const F=document.getElementById('f');F.innerHTML=(V[d.scene]||V.hello)(d);if(F.scrollHeight>1210+2)fit(Math.min(1.25,F.scrollHeight/1210));
+ const o=document.getElementById('open');
+ if(o) o.onclick=()=>go('open');
+ const so=document.getElementById('solo');
+ if(so){ if(!d.passenger) so.onclick=()=>go('withme'); else if(d.soloLong){let t;so.ontouchstart=so.onmousedown=()=>{t=setTimeout(()=>go('solo'),1200)};so.ontouchend=so.onmouseup=so.ontouchcancel=()=>clearTimeout(t);} else so.onclick=()=>go('solo'); }}
+</script></body></html>

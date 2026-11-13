@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=1400,user-scalable=no">
+<style>
+@font-face{font-family:'Pre';font-weight:400;src:url(Pretendard-Regular.otf)}
+@font-face{font-family:'Pre';font-weight:600;src:url(Pretendard-Medium.otf)}
+@font-face{font-family:'Pre';font-weight:800;src:url(Pretendard-Bold.otf)}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden}
+body{background:#f7f8fa;color:#2b221c;font-family:'Pre',sans-serif;word-break:keep-all}
+#f{position:absolute;left:0;top:0;padding:34px 60px 98px;display:flex;flex-direction:column;justify-content:safe center;background:#f7f8fa}
+.hl{font-size:60px;font-weight:800;line-height:1.22;letter-spacing:-.5px}
+.tt{font-size:38px;font-weight:800;line-height:1.3}
+.bd{font-size:30px;line-height:1.45}
+.lb{font-size:24px;font-weight:600;color:#4b5260}
+.hl,.tt,.bd,.cd b{text-wrap:balance}
+*{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none} input{-webkit-user-select:text;user-select:text}
+.say.n:after{display:none}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.grow{flex:1}.row{display:flex;gap:18px;align-items:stretch}
+.chip{display:inline-block;background:#fff;border:1.5px solid #d9dde4;border-radius:999px;padding:10px 24px;font-size:24px;font-weight:600}
+.hero{border-radius:40px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cd{background:#fff;border:1.5px solid #e1e4ea;border-radius:26px;padding:22px 28px}
+.cd b{font-size:32px;display:block;margin-top:4px;font-weight:800}
+.btn{height:92px;border-radius:999px;background:#2b221c;color:#fff;font-size:30px;font-weight:800;display:grid;place-items:center;padding:0 44px}
+.btn.ghost{background:#fff;color:#2b221c;border:1.5px solid #c9ced8}
+.btn:active,.tap:active{transform:scale(.97)}
+.mo{display:block;overflow:visible}
+.say{background:#fff;border:1.5px solid #e1e4ea;border-radius:36px;padding:34px 40px;position:relative}
+.say:after{content:'';position:absolute;right:-17px;top:76px;width:32px;height:32px;background:#fff;border-right:1.5px solid #e1e4ea;border-top:1.5px solid #e1e4ea;transform:rotate(45deg)}
+.say.l:after{right:auto;left:-17px;border:0;border-left:1.5px solid #e1e4ea;border-bottom:1.5px solid #e1e4ea}
+.who{font-size:24px;font-weight:800;color:#8a6f5a;margin-bottom:10px}
+input,select{font-family:'Pre',sans-serif;font-size:34px;font-weight:600;color:#2b221c;background:#fff;border:2px solid #2b221c;border-radius:22px;padding:18px 24px;outline:none}
+.emo{background:#fff;border:1.5px solid #d9dde4;border-radius:26px;padding:26px 28px;font-size:36px;font-weight:800;display:flex;align-items:center;gap:16px}
+.emo i{width:22px;height:22px;border-radius:50%;display:block}
+/* 주차 중에만 움직인다. 달릴 때 화면에는 아래 움직임을 쓰지 않는다 */
+@keyframes breathe{0%,100%{transform:translateY(0) scale(1,1)}50%{transform:translateY(5px) scale(1.035,.965)}}
+@keyframes hop{0%,74%,100%{transform:translateY(0) rotate(0) scale(1,1)}79%{transform:translateY(-44px) rotate(-7deg) scale(.97,1.04)}84%{transform:translateY(0) scale(1.07,.93)}89%{transform:translateY(-28px) rotate(6deg) scale(.98,1.03)}94%{transform:translateY(0) scale(1.05,.95)}}
+@keyframes joy{0%,100%{transform:translateY(0) scale(1,1)}30%{transform:translateY(-34px) scale(.96,1.05)}60%{transform:translateY(0) scale(1.08,.92)}}
+@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes blink{0%,91%,100%{opacity:0}93%,97%{opacity:1}}
+@keyframes unblink{0%,91%,100%{opacity:1}93%,97%{opacity:0}}
+.live{position:relative;display:inline-block;transform-origin:50% 92%}
+.live .b{position:absolute;left:0;top:0;opacity:0}
+.live.on{animation:breathe 2.6s ease-in-out infinite}
+.live.on .a{animation:unblink 4.6s linear infinite}.live.on .b{animation:blink 4.6s linear infinite}
+.hopper{display:inline-block;transform-origin:50% 92%;animation:hop 7s ease-in-out infinite}
+.joyer{display:inline-block;transform-origin:50% 92%;animation:joy .9s ease-in-out 3}
+.popin{display:inline-block;transform-origin:50% 92%;animation:pop .5s ease-out both}
+</style></head><body><div id="f"></div>
+<script>
+const go=a=>{try{Android.on(a)}catch(e){console.log(a)}};
+const OL='#5a4636',DK='#3b2d24',W='#fffdf8';
+const PASTEL={목:'#d9f3e6',화:'#ffe1d6',토:'#fff0c9',금:'#e9edf3',수:'#dbe9ff'};
+const P=(d,f=W,w=5,st=OL)=>`<path d="${d}" fill="${f}" stroke="${st}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"/>`;
+const E=(cx,cy,rx,ry,f=W,w=5)=>`<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="${f}" stroke="${w?OL:'none'}" stroke-width="${w}"/>`;
+const C=(cx,cy,r,f=W,w=5)=>E(cx,cy,r,r,f,w);
+const dots=(...a)=>a.map(([x,y,r=3])=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${DK}"/>`).join('');
+// 얼굴: m=표정, y=눈 높이, mouth=입 모양('w'|'none')
+function face(m='normal',y=112,mouth='w',mx=100,my){my=my||y+13;const L=70,R=130;const eye=x=>`<ellipse cx="${x}" cy="${y}" rx="5.2" ry="6.8" fill="${DK}"/><circle cx="${x+1.9}" cy="${y-2.6}" r="2.1" fill="#fff"/><circle cx="${x-1.6}" cy="${y+2.6}" r="1" fill="#fff"/>`;
+ const brow=(a=0)=>P(`M${L-7} ${y-15+a} q7 -4 13 -1`,'none',3,DK)+P(`M${R+7} ${y-15+a} q-7 -4 -13 -1`,'none',3,DK);
+ const sad=P(`M${L-8} ${y-13} q8 -2 15 4`,'none',3,DK)+P(`M${R+8} ${y-13} q-8 -2 -15 4`,'none',3,DK);
+ const blush=(o=.9,r=12)=>`<g opacity="${o}"><ellipse cx="${L-20}" cy="${y+15}" rx="${r}" ry="${r*.62}" fill="#ffb9c8"/><ellipse cx="${R+20}" cy="${y+15}" rx="${r}" ry="${r*.62}" fill="#ffb9c8"/></g>`;
+ const M=mouth==='none'?{w:'',o:'',smile:'',wavy:'',open:''}:{w:P(`M${mx-8} ${my} q4 5 8 0 q4 5 8 0`,'none',3,DK),o:E(mx,my+2,4.2,5.4,'#f08aa0',3),smile:P(`M${mx-7} ${my} q7 5 14 0`,'none',3,DK),wavy:P(`M${mx-10} ${my+2} q3.5 -4 7 0 q3.5 4 7 0 q3.5 -4 7 0`,'none',3,DK),open:P(`M${mx-8} ${my-2} q8 12 16 0Z`,'#f08aa0',3,DK)};
+ const big=x=>`<circle cx="${x}" cy="${y}" r="9" fill="${DK}"/><circle cx="${x+3}" cy="${y-3}" r="3.2" fill="#fff"/><circle cx="${x-2.5}" cy="${y+3.5}" r="1.5" fill="#fff"/>`;
+ return ({normal:brow()+eye(L)+eye(R)+blush()+M.w,
+  careful:big(L)+big(R)+blush(.8)+(mouth==='none'?'':P(`M${mx-6} ${my+1} h12`,'none',3,DK)),
+  happy:brow(-2)+P(`M${L-8} ${y+2} q8 -10 16 0`,'none',4,DK)+P(`M${R-8} ${y+2} q8 -10 16 0`,'none',4,DK)+blush(1,14)+M.open,
+  surprised:P(`M${L-9} ${y-20} q9 -7 17 -3`,'none',3,DK)+P(`M${R+9} ${y-20} q-9 -7 -17 -3`,'none',3,DK)+big(L)+big(R)+blush(.7)+M.o,
+  nervous:sad+eye(L)+eye(R)+blush(.6)+M.wavy+P(`M${R+30} ${y-32} C${R+24} ${y-20} ${R+24} ${y-13} ${R+30} ${y-11} C${R+36} ${y-13} ${R+36} ${y-20} ${R+30} ${y-32}Z`,'#a9cdff',3,'#5b8fd6'),
+  blushing:brow(2)+P(`M${L-8} ${y} h16`,'none',4,DK)+P(`M${R-8} ${y} h16`,'none',4,DK)+blush(1,19)+M.smile,
+  sleepy:brow(3)+P(`M${L-8} ${y} q8 5 16 0`,'none',4,DK)+P(`M${R-8} ${y} q8 5 16 0`,'none',4,DK)+blush(.7)+M.o,
+  teary:sad+big(L)+big(R)+blush(.8)+M.wavy+P(`M${L-12} ${y+8} C${L-16} ${y+16} ${L-16} ${y+21} ${L-12} ${y+22} C${L-8} ${y+21} ${L-8} ${y+16} ${L-12} ${y+8}Z`,'#a9cdff',2.5,'#5b8fd6'),
+  relieved:brow(2)+P(`M${L-8} ${y+1} q8 6 16 0`,'none',4,DK)+P(`M${R-8} ${y+1} q8 6 16 0`,'none',4,DK)+blush()+M.o})[m];}
+const BODY='M100 50 C150 50 176 86 176 124 C176 160 146 180 100 180 C54 180 24 160 24 124 C24 86 50 50 100 50Z';
+const feet=(c=W)=>E(76,181,14,7,c)+E(124,181,14,7,c);
+const arms=(c=W)=>E(28,138,11,8,c)+E(172,138,11,8,c);
+const stripes=(c)=>P('M88 64 h24 M92 74 h16 M100 62 v16','none',4.5,c)+P('M32 112 l13 3 M30 124 l13 0 M168 112 l-13 3 M170 124 l-13 0','none',4,c);
+const muz=(c,rx=27,ry=17,y=134)=>E(100,y,rx,ry,c,4);
+// ── 수호 다섯: 동물 생김새를 살림
+const G={
+ 청룡:m=>{const b='#9fe0cc',g='#ffd978';return P('M150 152 C190 156 200 122 182 104 C178 124 168 130 152 130Z',b)+P('M176 108 l10 -8 M184 122 l11 -4','none',4)+
+  P('M70 60 C60 46 58 34 60 22 C66 28 70 30 73 38 L80 28 C86 38 86 50 82 60Z',g)+P('M130 60 C140 46 142 34 140 22 C134 28 130 30 127 38 L120 28 C114 38 114 50 118 60Z',g)+
+  feet(b)+arms(b)+P(BODY,b)+E(100,160,38,17,'#fff6d6',0)+P('M92 54 l8 -9 l8 9','#ffd978',4)+muz('#e6f8f1',30,18,136)+dots([92,131],[108,131])+
+  P('M72 138 C54 136 48 150 36 146','none',3.5,'#d9a93a')+P('M128 138 C146 136 152 150 164 146','none',3.5,'#d9a93a')+face(m,104,'w',100,142);},
+ 주작:m=>{const b='#ff9d7a';return P('M150 146 C196 150 204 112 190 96 C184 118 172 124 154 122Z','#ff7a59')+P('M156 158 C200 172 214 138 204 122 C196 142 182 146 162 142Z','#ffb347')+P('M152 170 C190 190 208 166 204 152 C194 164 180 166 160 160Z','#ffd978')+
+  P('M84 58 C72 46 72 32 76 22 C86 30 92 42 94 56Z','#ff7a59')+P('M116 58 C128 46 128 32 124 22 C114 30 108 42 106 56Z','#ff7a59')+P('M100 56 C90 38 96 22 100 10 C106 22 110 38 100 56Z','#ffd978')+
+  P('M70 176 l-6 10 M76 176 v11 M82 176 l6 10 M118 176 l-6 10 M124 176 v11 M130 176 l6 10','none',4,'#d9902a')+P(BODY,b)+E(100,158,36,19,'#fff0d9',0)+
+  P('M26 120 C10 128 12 156 34 160 C44 148 44 132 40 118Z','#ff7a59')+P('M174 120 C190 128 188 156 166 160 C156 148 156 132 160 118Z','#ff7a59')+
+  face(m,108,'none')+P('M90 124 L110 124 L100 138Z','#ffcf5a',4);},
+ 해태:m=>{const b='#ffe7a6',mn='#e9b65a';return P('M156 150 C176 146 186 160 178 172 C170 178 160 172 162 164','none',5)+[[176,150],[188,162],[180,176]].map(([x,y])=>C(x,y,11,mn,4)).join('')+
+  [[38,96],[44,70],[62,52],[86,44],[114,44],[138,52],[156,70],[162,96],[34,122],[166,122]].map(([x,y])=>C(x,y,19,mn)).join('')+
+  feet(b)+arms(b)+P('M100 46 C92 32 94 18 100 8 C106 18 108 32 100 46Z','#fff3d6')+P(BODY,b)+
+  P('M62 92 q10 -9 20 -2','none',5,DK)+P('M138 92 q-10 -9 -20 -2','none',5,DK)+muz('#fff8e6',26,16,134)+`<path d="M92 126 h16 l-8 9Z" fill="${DK}"/>`+
+  `<path d="M88 144 l3 7 l3 -6Z M106 145 l3 6 l3 -7Z" fill="#fff" stroke="${OL}" stroke-width="2"/>`+face(m,108,'w',100,141).replace(/<path d="M63[^>]*>|<path d="M137[^>]*>/g,'')+C(100,172,8,'#ffcf5a',4);},
+ 백호:m=>{const s='#8a93a3';return P('M162 150 C196 152 202 120 188 106','none',15,OL)+P('M162 150 C196 152 202 120 188 106','none',9,W)+P('M178 150 l5 -10 M190 140 l-9 -6 M194 124 l-10 2','none',4,s)+
+  C(54,62,19)+C(146,62,19)+C(54,64,9,'#ffb3c4',0)+C(146,64,9,'#ffb3c4',0)+feet()+arms()+P(BODY)+stripes(s)+P('M44 150 l12 -4 M40 162 l14 -2 M156 150 l-12 -4 M160 162 l-14 -2','none',4,s)+
+  muz('#fff',25,16,134)+`<path d="M93 126 h14 l-7 8Z" fill="#ff9db0" stroke="${OL}" stroke-width="3"/>`+face(m,108,'w',100,141);},
+ 현무:m=>{const sh='#8fb8f5';return P('M168 160 C186 164 190 152 186 144','none',5)+E(100,104,86,78,sh)+P('M100 30 l26 14 v26 l-26 14 l-26 -14 v-26Z','#c9e0ff',4)+P('M74 44 L40 46 M126 44 L160 46 M74 70 L22 86 M126 70 L178 86 M100 84 V96','none',4)+
+  E(40,160,20,12,'#d9eaff')+E(160,160,20,12,'#d9eaff')+E(100,128,60,52,'#eef6ff')+face(m,118,'w',100,136);},
+};
+// ── 띠 친구 열둘
+const B2='M100 56 C146 56 172 90 172 126 C172 160 144 178 100 178 C56 178 28 160 28 126 C28 90 54 56 100 56Z';
+const sk=(k,cx,cy,x)=>`<g transform="translate(${cx} ${cy}) scale(${k}) translate(${-cx} ${-cy})">${x}</g>`;
+const limb=(c)=>E(36,142,10,7,c,4)+E(164,142,10,7,c,4)+E(80,179,12,6,c,4)+E(120,179,12,6,c,4);
+const body=(c)=>limb(c)+P(B2,c,4.5);
+const nose=(c='#f08aa0',y=126)=>E(100,y,4.5,3.5,c,2.5);
+const Z={
+ 쥐:(m,k)=>P('M158 156 C190 160 196 136 186 124','none',4,'#f5aebe')+sk(k,100,70,C(58,66,22,'#eef0f4',4.5)+C(142,66,22,'#eef0f4',4.5)+C(58,68,11,'#ffc9d4',0)+C(142,68,11,'#ffc9d4',0))+body('#eef0f4')+face(m,116,'none')+nose()+`<rect x="96.5" y="131" width="7" height="8" rx="2" fill="#fff" stroke="${OL}" stroke-width="2.5"/>`,
+ 소:(m,k)=>sk(k,100,62,P('M76 62 C66 56 64 46 68 38 C74 44 80 48 84 56Z','#fff3d6',4)+P('M124 62 C134 56 136 46 132 38 C126 44 120 48 116 56Z','#fff3d6',4)+E(44,84,14,8,'#f3dcc4',4)+E(156,84,14,8,'#f3dcc4',4))+body('#fffaf2')+`<ellipse cx="134" cy="102" rx="22" ry="19" fill="#e2bf9c" opacity=".75"/>`+face(m,114,'none')+E(100,134,19,12,'#ffd3dc',4)+dots([93,134,2.6],[107,134,2.6]),
+ 호랑이:(m,k)=>P('M158 152 C186 154 192 130 182 118','none',12,OL)+P('M158 152 C186 154 192 130 182 118','none',6.5,'#ffe1ad')+P('M174 150 l4 -8 M184 138 l-8 -4','none',3,'#c98a4a')+sk(k,100,68,C(60,66,17,'#ffe1ad',4.5)+C(140,66,17,'#ffe1ad',4.5)+C(60,68,8,'#fff3dc',0)+C(140,68,8,'#fff3dc',0))+body('#ffe1ad')+P('M90 68 h20 M94 77 h12','none',3.5,'#c98a4a')+P('M36 116 l10 2 M36 126 l10 0 M164 116 l-10 2 M164 126 l-10 0','none',3,'#c98a4a')+face(m,116,'w',100,132)+nose('#c98a4a',125),
+ 토끼:(m,k)=>C(166,160,11,W,4)+sk(k,100,62,E(76,36,12,30,W,4.5)+`<ellipse cx="76" cy="38" rx="5" ry="20" fill="#ffc9d4"/>`+P('M120 62 C116 36 126 18 142 22 C152 28 144 50 134 62Z',W,4.5)+`<path d="M126 56 C124 40 130 30 138 30 C142 36 138 48 132 56Z" fill="#ffc9d4"/>`)+body(W)+face(m,116,'w',100,131)+nose('#f08aa0',124),
+ 용:(m,k)=>P('M158 154 C186 156 194 132 182 120 C180 134 172 138 160 138Z','#d6f3e6',4)+C(186,116,7,'#ffe08a',3)+sk(k,100,62,P('M76 62 C68 52 66 42 68 32 C74 38 78 40 80 46 L86 38 C90 46 88 54 86 62Z','#ffe08a',4)+P('M124 62 C132 52 134 42 132 32 C126 38 122 40 120 46 L114 38 C110 46 112 54 114 62Z','#ffe08a',4))+body('#d6f3e6')+E(100,160,32,13,'#fffbe6',0)+P('M70 132 C56 130 52 142 42 138','none',3,'#e2b84a')+P('M130 132 C144 130 148 142 158 138','none',3,'#e2b84a')+face(m,114,'w',100,130)+dots([95,123,2],[105,123,2]),
+ 뱀:(m,k)=>{const b='#dcf2c2';return E(100,166,70,18,b,4.5)+E(100,154,50,15,b,4.5)+P('M164 170 C184 172 188 160 184 154','none',9,OL)+P('M164 170 C184 172 188 160 184 154','none',4.5,b)+E(100,104,56,50,b,4.5)+sk(k,100,62,`<circle cx="84" cy="66" r="5" fill="#b9de8f"/><circle cx="100" cy="60" r="5" fill="#b9de8f"/><circle cx="116" cy="66" r="5" fill="#b9de8f"/>`)+face(m,104,'smile'==='w'?'w':'none')+P('M93 118 q7 5 14 0','none',3,DK)+P('M100 122 v8 l-5 5 M100 130 l5 5','none',3,'#f08aa0');},
+ 말:(m,k)=>P('M158 150 C184 150 188 172 180 182 C178 168 170 166 160 164Z','#c9a07a',4)+sk(k,100,66,P('M72 66 L66 38 L88 56Z','#f1d3b3',4.5)+P('M128 66 L134 38 L112 56Z','#f1d3b3',4.5))+body('#f1d3b3')+P('M78 62 C80 46 98 44 104 54 C112 46 124 52 122 66 C114 60 106 64 100 70 C94 62 86 62 78 62Z','#c9a07a',4)+face(m,114,'none')+E(100,134,19,13,'#fdebd8',4)+dots([93,133,2.4],[107,133,2.4]),
+ 양:(m,k)=>{const w='#fffaf0';return sk(k,100,90,P('M46 100 C32 98 30 118 44 120','none',4,'#c9a57a')+P('M154 100 C168 98 170 118 156 120','none',4,'#c9a57a'))+limb('#fbe6d0')+[[40,128],[44,102],[58,80],[80,66],[100,62],[120,66],[142,80],[156,102],[160,128],[150,154],[50,154],[76,170],[100,174],[124,170]].map(([x,y])=>C(x,y,18,w,4.5)).join('')+E(100,122,56,54,w,0)+E(100,124,42,40,'#fbe6d0',4.5)+sk(k,100,84,[[82,86],[100,80],[118,86]].map(([x,y])=>C(x,y,14,w,4.5)).join(''))+face(m,120,'w',100,136)+nose('#d9a37a',130);},
+ 원숭이:(m,k)=>P('M160 152 C188 152 192 126 178 122 C188 132 184 142 172 140','none',4.5)+sk(k,100,110,C(30,108,16,'#f8dcc0',4.5)+C(170,108,16,'#f8dcc0',4.5))+body('#e3c3a2')+P('M100 82 C86 68 60 80 62 108 C62 140 82 152 100 152 C118 152 138 140 138 108 C140 80 114 68 100 82Z','#f8dcc0',4)+face(m,114,'w',100,131)+dots([96,123,2],[104,123,2]),
+ 닭:(m,k,g)=>{const b=g===0?'#ffe98a':W;return (g===0?'':P('M152 150 C180 142 188 120 180 106 C176 122 168 128 156 130Z',W,4))+sk(g===0?0:k,100,60,P('M86 60 C82 46 92 42 94 52 C96 40 106 40 108 52 C110 42 120 46 116 60Z','#ff9d9d',4))+(g===0?P('M100 58 q-4 -12 4 -16','none',3.5):'')+P('M74 176 l-5 8 M80 176 v9 M86 176 l5 8 M114 176 l-5 8 M120 176 v9 M126 176 l5 8','none',3.5,'#e2a23a')+P(B2,b,4.5)+P('M30 124 C18 132 20 152 36 156 C42 146 42 134 40 122Z',g===0?'#ffe07a':'#fff6e0',4)+P('M170 124 C182 132 180 152 164 156 C158 146 158 134 160 122Z',g===0?'#ffe07a':'#fff6e0',4)+face(m,114,'none')+P('M92 126 L108 126 L100 137Z','#ffc94a',3.5);},
+ 개:(m,k)=>P('M158 150 C182 146 188 128 182 116 C178 132 170 136 158 138Z','#fbe8c8',4)+sk(k,100,74,P('M54 70 C34 72 30 106 44 116 C54 108 58 90 62 76Z','#d9b48f',4.5)+P('M146 70 C166 72 170 106 156 116 C146 108 142 90 138 76Z','#d9b48f',4.5))+body('#fbe8c8')+face(m,114,'none')+E(100,126,7,5,DK,0)+P('M100 131 v4 M92 137 q8 6 16 0','none',3,DK)+P('M96 141 q4 9 8 0Z','#ff9db0',3),
+ 돼지:(m,k)=>P('M162 150 C180 146 180 164 170 160 C164 156 172 150 178 156','none',4,'#f5aebe')+sk(k,100,70,P('M58 76 L52 46 L82 62Z','#ffc4d2',4.5)+P('M142 76 L148 46 L118 62Z','#ffc4d2',4.5))+body('#ffdbe4')+face(m,112,'none')+E(100,131,17,12,'#ffb7c8',4)+dots([94,131,2.6],[106,131,2.6])+P('M93 148 q7 4 14 0','none',3,DK),
+};
+const BABY={쥐:'아기 쥐',소:'송아지',호랑이:'아기 호랑이',토끼:'아기 토끼',용:'아기 용',뱀:'아기 뱀',말:'망아지',양:'아기 양',원숭이:'아기 원숭이',닭:'병아리',개:'강아지',돼지:'아기 돼지'};
+const SCARF=P('M52 150 C76 164 124 164 148 150 L150 160 C124 176 76 176 50 160Z','#ff9d7a',4)+P('M126 164 l8 22 l12 -6 l-8 -20Z','#ff9d7a',4);
+function mo(n,s=180,m='normal',g=1){
+ if(G[n])return `<svg class="mo" width="${s}" height="${s}" viewBox="-6 0 216 200">${G[n](m)}</svg>`;
+ const k=[.72,1,1.18][g],sc=[.95,1.02,1.1][g];
+ const extra=g===0&&n!=='닭'?P('M100 58 q-5 -12 3 -17','none',3.5)+C(104,40,4,'#b9de8f',3):g===2?SCARF:'';
+ return `<svg class="mo" width="${s}" height="${s}" viewBox="-6 0 216 200"><g transform="translate(100 186) scale(${sc}) translate(-100 -186)">${Z[n](m,k,g)}${extra}</g></svg>`;}
+
+const NAME={목:'나무',화:'불',토:'흙',금:'쇠',수:'물'};
+const ORB={목:'#5fb38a',화:'#ef7a4d',토:'#d9a35e',금:'#b9c2d0',수:'#4d9dff'};
+const ANI=['쥐','소','호랑이','토끼','용','뱀','말','양','원숭이','닭','개','돼지'];
+const AEL=['수','토','목','목','토','화','화','토','금','금','토','수'];
+const EMO={좋았어요:'#ffd166',뿌듯해요:'#5fb38a',괜찮아요:'#7cc4ee','생각이 많아요':'#c9a35a',짜증나요:'#d56a55',불안해요:'#5a7fd6',우울해요:'#8a8fa8'};
+// 옆자리 조합 15종 — 좋은 이름만 (키치 화면과 같은 표)
+const COMBO={'목목':['숲길 동행','같이 자라는 사이','요즘 배우는 것 하나씩 말하기'],'화화':['불꽃 텐션','웃음이 두 배 되는 사이','한 곡 골라 같이 따라 부르기'],'토토':['든든 베이스캠프','말 안 해도 편한 사이','도착하면 뭐 먹을지 하나로 정하기'],'금금':['칼각 듀오','계획이 착착 맞는 사이','오늘 일정 순서 같이 정하기'],'수수':['잔잔한 라디오','이야기가 잘 통하는 사이','요즘 재미있게 본 것 하나 말하기'],
+ '목화':['수다 폭발','나무가 불을 키우는 사이','도착 전까지 웃긴 이야기 하나씩'],'화토':['따끈한 밥상','불이 흙을 데우는 사이','맛집 하나 찍어 가기'],'토금':['보물찾기','흙 속에서 쇠가 빛나는 사이','서로 장점 하나 찾아 말해 주기'],'금수':['맑은 샘물','쇠에 맺힌 물처럼 맑아지는 사이','고마웠던 일 하나 말하기'],'수목':['새싹 응원단','물이 나무를 키우는 사이','상대 요즘 도전에 응원 한마디'],
+ '목토':['균형 정원사','달라서 균형 잡히는 사이','오늘 메뉴는 한 사람씩 양보'],'토수':['든든 방파제','출렁여도 잡아 주는 사이','서로 말 끝까지 들어 주기'],'수화':['온탕 냉탕','식혀 주고 데워 주는 사이','에어컨 온도, 둘이 합의 보기'],'화금':['대장간 콤비','서로를 단련시키는 사이','부드럽게 솔직한 조언 하나'],'금목':['목수와 연장','다듬어 주는 사이','같이 할 작은 계획 하나 세우기']};
+const combo=(a,b)=>COMBO[a+b]||COMBO[b+a];
+const SOLOBTN=d=>`<span class="chip tap" id="solo" style="margin-left:14px;padding:12px 24px;font-size:24px;border:2px solid #2b221c">${esc(d.soloLabel||'동승자 있어요')}</span>`;
+const SETBTN=`<span class="chip tap" style="margin-left:14px;padding:12px 24px;font-size:24px;border:2px solid #2b221c" onclick="go('settings')">설정</span>`;
+const GLINE={청룡:'오늘 길은 내가 앞장설게요.',주작:'따뜻한 기운 가득 채워 왔어요.',해태:'나쁜 일은 내가 막아 볼게요.',백호:'옆에서 든든하게 지켜 줄게요.',현무:'어떤 길이든 단단히 버텨 줄게요.'};
+const ya=w=>{const c=w.charCodeAt(w.length-1);return w+((c>=0xAC00&&c<=0xD7A3&&(c-0xAC00)%28)?'이야':'야');};
+const gline=d=>G[d.ch]&&GLINE[d.ch]?`<div class="bd" style="margin-bottom:8px;color:#8a6f5a;font-weight:600">${GLINE[d.ch]}</div>`:'';
+const esc=t=>String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// 살아 있는 친구(주차 중): 숨 쉬고 깜빡인다. still=true 면 멈춘 그림(달릴 때)
+const pal=(n,s,m,g,still)=>still?mo(n,s,m,g):`<span class="live on"><span class="a">${mo(n,s,m,g)}</span><span class="b">${mo(n,s,m==='happy'?'happy':'relieved',g)}</span></span>`;
+const hdr=(d,r)=>`<div class="top"><span style="display:flex;align-items:center;gap:18px"><b style="font-size:30px;font-weight:800">기운차</b>${d&&d.tripNote?`<span class="chip" style="background:#fff7d6;border-color:#e2c15a;padding:6px 18px;font-size:22px">잘 도착했어요 · 복 +${d.tripNote}</span>`:''}</span><span class="lb">${r||''}</span></div>`;
+const kindName=d=>G[d.ch]?d.ch:[BABY[d.ch]||d.ch,'어린 '+d.ch,'다 큰 '+d.ch][d.g||0];
+const tagOf=d=>`${esc(d.fname)} · ${kindName(d)}`;
+const MOOD={좋았어요:'happy',뿌듯해요:'blushing',괜찮아요:'normal','생각이 많아요':'sleepy',짜증나요:'careful',불안해요:'nervous',우울해요:'teary'};
+const FOOT='<div class="lb" style="margin-top:16px;font-weight:400">미리 써 둔 문장으로 답해요 · 상담이나 치료가 아니에요 · 많이 힘들 땐 자살예방 상담전화 109(24시간) · 위급할 땐 119</div>';
+// 큰 글씨 첫머리는 어려운 '쇠의 기운' 대신 오늘의 색으로
+const two=(l,c)=>{const i=l.indexOf('. ');if(i<0)return esc(l);const head=c?c+'의 날':l.slice(0,i).replace(/^오늘은 /,'');return esc(head)+',<br>'+esc(l.slice(i+2));};
+const V={
+ setup:d=>{const [y,m,dd]=d.birth.split('-').map(Number);const opt=(a,b,sel,suf)=>{let h='';for(let i=a;i<=b;i++)h+=`<option value="${i}"${i===sel?' selected':''}>${i}${suf}</option>`;return h;};
+  return `<div class="row grow" style="gap:60px;align-items:center"><div style="flex:1.15">
+   <div class="hl" style="font-size:132px;line-height:1">기운차</div><div class="bd" style="font-size:38px;margin-top:14px;color:#4b5260">타면 탈수록 나를 알아가는 차</div>
+   <div class="lb" style="margin-top:44px">부를 이름 (별명도 괜찮아요)</div><input id="nm" value="${esc(d.name)}" maxlength="8" style="width:520px;margin-top:10px">
+   <div class="lb" style="margin-top:30px">생년월일 (양력)</div>
+   <div class="row" style="margin-top:10px"><select id="by">${opt(1940,2015,y,'년')}</select><select id="bm">${opt(1,12,m,'월')}</select><select id="bd">${opt(1,31,dd,'일')}</select></div>
+   <div class="lb" style="margin-top:16px;font-weight:400;line-height:1.5">생년월일은 띠와 오늘의 색을 고르는 데만 써요. 태어난 시각은 몰라도 괜찮아요.<br>이름 · 생년월일 · 고른 한 단어는 이 차 안에만 남고, 설정에서 언제든 지울 수 있어요.</div>
+   <div class="row" style="margin-top:36px"><div class="btn tap" onclick="sendSetup()">나를 알아보기</div></div></div>
+   <div style="flex:1"><div class="hero" style="background:#eef0f3;height:600px;gap:8px">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px 10px">${ANI.map((a,i)=>`<span class="live on" style="animation-delay:-${(i*0.37).toFixed(2)}s">${mo(a,118,'normal',0)}</span>`).join('')}</div>
+    <div class="bd" style="margin-top:14px;font-weight:600">열두 띠 친구가 기다리고 있어요</div></div></div></div>`},
+ friend:d=>`${hdr(d,'처음 설정 · 2 / 2')}<div class="row grow" style="gap:60px;align-items:center"><div style="flex:1.15">
+   <div class="bd" style="color:#4b5260">태어난 날로 보면, ${esc(d.name)}님은</div>
+   <div class="hl" style="font-size:76px;line-height:1.08;margin-top:6px">${esc(d.title)}</div>
+   <div class="bd" style="font-size:34px;margin-top:16px">${esc(d.desc)}</div>
+   <div style="margin-top:22px"><span class="chip">${d.animal}띠</span> <span class="chip">태어난 날의 기운 · ${esc(d.myWord||'')}</span></div>
+   <div class="lb" style="margin-top:14px;font-weight:400">재미로 보는 풀이예요. 맞지 않아도, 따르지 않아도 괜찮아요.</div>
+   <div class="say l" style="margin-top:28px;padding:24px 30px"><div class="who">${d.animal}띠 친구</div><div class="tt">안녕! 나는 ${ya(BABY[d.animal]||d.animal)}. 나한테 이름을 지어 줄래?</div></div>
+   <div class="row" style="margin-top:18px;align-items:center"><input id="fn" value="${esc(d.fname)}" maxlength="8" style="width:360px"><div class="btn tap" onclick="go('fname:'+document.getElementById('fn').value)">시작하기</div></div>
+   <div class="lb" style="margin-top:16px;font-weight:400">함께 탄 날만큼 친구가 자라요. 첫 변화는 일주일 뒤예요.</div></div>
+   <div style="flex:1"><div class="hero" style="background:${PASTEL[d.myEl]||'#eef0f3'};height:640px"><span class="popin"><span class="hopper">${pal(d.animal,520,'happy',0)}</span></span></div></div></div>`,
+ morning:d=>{const el=d.element||'금';
+  if(d.grewNow) return `${hdr(d,d.date)}<div class="row grow" style="gap:30px;align-items:center;justify-content:center"><div style="text-align:center;opacity:.55">${mo(d.animal,240,'normal',d.grewNow-1)}<div class="lb">전에는</div></div><div class="hl" style="font-size:80px">→</div><div style="text-align:center"><span class="popin"><span class="joyer">${pal(d.animal,460,'happy',d.grewNow)}</span></span></div>
+   <div style="flex:1;max-width:560px"><div class="say l"><div class="who">${esc(d.fname)}</div><div class="hl" style="font-size:64px">${d.grewNow===1?'나 조금 자랐어요!':'다 자랐어요!'}</div><div class="bd" style="margin-top:10px">함께 탄 날이 ${d.count}일이 됐어요. 고마워요, ${esc(d.name)}님.</div></div>
+   <div class="row" style="margin-top:22px"><div class="btn tap" onclick="go('grewok')">오늘의 카드 보기</div></div><div class="lb" style="margin-top:12px;font-weight:400">예전 모습이 좋으면 '내 친구'에서 바꿀 수 있어요</div></div></div>`;
+  const left=d.rest?`<div class="who">${tagOf(d)}</div><div class="hl">오늘은 쉬어 가요</div><div class="bd" style="margin-top:14px">${esc(d.line)}</div>${d.help?`<div class="bd" style="margin-top:14px;font-weight:600">${esc(d.help)}</div>`:''}`
+   :`<div class="who">${tagOf(d)}</div>${d.justMet?`<div class="bd" style="margin-bottom:8px;font-weight:600;font-size:26px">이름 불러 줘서 고마워요, ${esc(d.name)}님! 오늘부터 같이 타요.</div>`:''}${gline(d)}<div class="hl" style="font-size:${d.justMet||d.follow?52:60}px">${two(d.line,d.colorName)}</div>${d.follow?`<div class="bd" style="margin-top:14px;color:#4b5260">${esc(d.follow)}</div>`:''}`;
+  return `${hdr(d,d.date+SOLOBTN(d)+SETBTN)}<div class="row grow" style="gap:44px;align-items:center"><div style="flex:1.2">
+   <div class="bd" style="color:#4b5260">${esc(d.greet||'좋은 아침이에요')}, ${esc(d.name)}님${d.ydayLong?` · <span style="font-size:24px">${esc(d.ydayLong)}</span>`:''}</div>
+   <div class="say" style="margin-top:10px;padding:26px 34px">${left}</div>
+   <div class="cd" style="margin-top:14px;border:2px solid #2b221c;padding:16px 26px"><div class="lb">오늘 할 일 하나</div><b style="font-size:34px">${esc(d.action)}</b></div>
+   <div class="row" style="margin-top:12px"><div class="cd grow"><div class="lb">오늘의 색</div><b><span style="color:${ORB[el]}">●</span> ${esc(d.colorName)}${d.wear?` · ${esc(d.wear)}`:''}</b></div><div class="cd"><div class="lb">기운의 방향</div><b>${esc(d.direction)}쪽</b></div></div>
+   <div class="row" style="margin-top:18px">${d.rest?`<div class="btn ghost tap" style="flex:1" onclick="go('help')">${d.help?'접기':'힘들 땐 전화할 곳'}</div>`:`<div class="btn tap" style="flex:1" onclick="go('more')">더 알고 싶어요</div>`}${d.passenger?'':`<div class="btn ghost tap" onclick="go('gate')">내 기록</div>`}<div class="btn ghost tap" onclick="go('myfriend')">내 친구</div></div></div>
+   <div style="flex:1"><div class="hero" style="background:${PASTEL[el]||'#eef0f3'};height:640px"><span class="hopper">${pal(d.ch,410,d.rest?'relieved':'normal',d.g)}</span>
+    <div class="chip" style="margin-top:6px">${esc(d.fname)}와 함께 ${d.count}일째 · 복 ${d.bok}</div>${d.follow?`<span class="chip tap" style="margin-top:12px;font-size:24px;padding:12px 24px;border:2px solid #2b221c" onclick="go('talkclear')">어제 얘기는 이제 안 꺼내도 돼요</span>`:''}</div></div></div>`},
+ detail:d=>{const el=d.element||'금';
+  return `${hdr(d,d.date)}<div class="row grow" style="gap:40px;align-items:center"><div style="flex:.62;text-align:center">${pal(d.ch,330,'happy',d.g)}<div class="chip" style="margin-top:8px">${tagOf(d)}</div></div>
+   <div style="flex:1.5"><div class="say l"><div class="who">${esc(d.fname)}</div><div class="tt" style="font-size:44px">${esc(d.elementWord)}의 기운, 조금 더 알려 줄게요</div></div>
+   <div class="cd" style="margin-top:20px;padding:8px 34px">${[['옷',d.clothes],['갈 곳',d.place],['사람',d.person],['좋은 시간',d.goodTime]].map(([k,v],i)=>`<div style="display:flex;gap:30px;align-items:center;padding:24px 0;${i?'border-top:1.5px solid #eceef2':''}"><span class="lb" style="min-width:150px">${k}</span><span class="tt" style="font-size:34px">${esc(v)}</span></div>`).join('')}</div>
+   <div class="lb" style="margin-top:14px;font-weight:400">이렇게 골랐어요 — ${esc(d.reason)}</div>
+   <div class="row" style="margin-top:22px"><div class="btn ghost tap" onclick="go('fold')">접기</div></div></div></div>`},
+ // 달릴 때: 멈춘 그림 + 큰 글자 한 줄. 움직임·단추 없음
+ driving:d=>`<div style="position:absolute;inset:0;background:#1b1d22"></div><div class="row grow" style="align-items:center;gap:90px;justify-content:center;position:relative;color:#fff">${pal(d.ch,470,d.alert?'careful':'normal',d.g,true)}<div style="width:820px"><div class="hl" style="font-size:92px">${esc(d.line)}</div>${d.alert?'<div class="lb" style="margin-top:26px;font-weight:400;color:#c9ced8">조심해서 지나가요</div>':''}</div></div>`,
+ destiny:d=>{const el=d.element||'금';const DIR=['북','북동','동','남동','남','남서','서','북서'];const pt=(n,r)=>{const a=(DIR.indexOf(n)*45-90)*Math.PI/180;return [170+r*Math.cos(a),170+r*Math.sin(a)];};
+  const [dx,dy]=pt(d.dDir,118),[tx,ty]=pt(d.direction,118);
+  const comp=`<svg width="340" height="340" viewBox="0 0 340 340"><circle cx="170" cy="170" r="118" fill="#fff" stroke="#d9dde4" stroke-width="3"/>${DIR.map(n=>{const [x,y]=pt(n,146);return `<text x="${x}" y="${y+8}" text-anchor="middle" font-size="22" font-weight="600" fill="#6b7280">${n}</text>`;}).join('')}<line x1="170" y1="170" x2="${tx}" y2="${ty}" stroke="#9aa3b2" stroke-width="5" stroke-dasharray="4 12" stroke-linecap="round"/><line x1="170" y1="170" x2="${dx}" y2="${dy}" stroke="#2b221c" stroke-width="6" stroke-linecap="round"/><circle cx="${dx}" cy="${dy}" r="14" fill="${ORB[el]}" stroke="#2b221c" stroke-width="4"/><circle cx="170" cy="170" r="8" fill="#2b221c"/></svg>`;
+  return `${hdr(d,'오늘의 데스티니 · 주말, 처음 가는 곳')}<div class="row grow" style="gap:44px;align-items:center"><div style="flex:1.25">
+   <div class="say"><div class="who">${tagOf(d)}</div><div class="hl" style="font-size:88px;line-height:1.1">${esc(d.place)}</div>
+   <div class="tt" style="margin-top:22px">${d.same?`오늘 기운이 가리키는 ${d.direction}쪽 길이에요.`:`${d.dDir}쪽으로 가는 길이네요.`}</div>
+   <div class="bd" style="margin-top:10px;color:#4b5260">${d.same?'마음 가는 대로, 천천히 다녀오세요.':`오늘 기운은 ${d.direction}쪽 — 돌아오는 길에 ${esc(d.weekendPlace)} 한 곳 들러 봐도 좋아요.`}</div></div>
+   <div class="row" style="margin-top:26px"><div class="btn tap" onclick="go('ok')">좋아요</div></div></div>
+   <div style="flex:1"><div class="hero" style="background:${PASTEL[el]||'#eef0f3'};height:600px;flex-direction:row;gap:10px">${pal(d.ch,300,'happy',d.g)}<div style="text-align:center">${comp}<div class="lb" style="margin-top:4px">━ 가는 길 &nbsp; ┄ 오늘 기운</div></div></div></div></div>`},
+ checkin:d=>`${hdr(d,'퇴근 · 주차 중'+SOLOBTN(d))}<div class="row grow" style="gap:44px;align-items:center"><div style="flex:.8;text-align:center">${pal(d.ch,400,'normal',d.g)}<div class="chip" style="margin-top:6px">${tagOf(d)}</div></div>
+   <div style="flex:1.5"><div class="say l"><div class="who">${esc(d.fname)}</div><div class="hl" style="font-size:84px">오늘 어땠어요?</div><div class="bd" style="margin-top:8px;color:#4b5260">한 단어만 골라 주세요. 내일 아침의 색이 돼요.</div></div>
+   <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:24px">${d.emotions.map(a=>`<div class="emo tap" style="font-size:${a.length>5?27:34}px;padding:24px 20px" onclick="go('emo:${a}')"><i style="background:${EMO[a]}"></i>${a}</div>`).join('')}<div class="emo tap" style="font-size:28px;color:#6b7280;justify-content:center" onclick="go('ok')">오늘은 넘어갈게요</div></div>
+   <div class="lb" style="margin-top:18px;font-weight:400">기록은 이 차 안에만 · 다시 볼 땐 한 번 더 물어봐요</div></div></div>`,
+ reply:d=>`${hdr(d,'퇴근 · 주차 중'+SOLOBTN(d))}<div class="row grow" style="gap:44px;align-items:center"><div style="flex:.8;text-align:center">${d.positive?`<span class="joyer">${pal(d.ch,400,'happy',d.g)}</span>`:pal(d.ch,400,({'괜찮아요':'normal','생각이 많아요':'sleepy','불안해요':'nervous','짜증나요':'careful','우울해요':'relieved'})[d.tag]||'relieved',d.g)}<div class="chip" style="margin-top:6px">${tagOf(d)}</div></div>
+   <div style="flex:1.5"><span class="chip"><span style="color:${EMO[d.tag]||'#999'}">●</span> ${esc(d.tag)}</span> <span class="chip" style="background:#eef7f0;border-color:#9cc9a8;color:#25613a">✓ 오늘 한 단어 저장했어요</span>
+   <div class="say l" style="margin-top:16px"><div class="who">${esc(d.fname)}</div><div class="hl" style="font-size:72px">${esc(d.empathy)}</div>${d.next?`<div class="bd" style="margin-top:14px">${esc(d.next)}</div>`:''}</div>
+   <div class="row" style="margin-top:22px;align-items:center">${d.nextEl?`<div class="cd"><div class="lb">내일 아침의 색</div><b><span style="color:${ORB[d.nextEl]}">●</span> ${esc(d.nextColor)}</b></div>`:''}${d.wordBok?`<div class="cd"><div class="lb">한 단어 남긴 복</div><b>+${d.wordBok}</b></div>`:''}</div>
+   <div class="row" style="margin-top:18px"><div class="btn tap" style="white-space:nowrap" onclick="go('ok')">내일 아침에 만나요</div>${d.canTalk?`<div class="btn ghost tap" style="white-space:nowrap" onclick="go('talk')">조금 더 이야기할래요</div>`:''}</div>
+   <div class="btn ghost tap" style="height:68px;font-size:24px;margin-top:14px;display:inline-grid" onclick="go('redo')">잘못 눌렀어요 · 다시 고를게요</div></div></div>`,
+ hello:d=>`${hdr(d,(d.bye?'오늘은 여기까지':'퇴근길')+SOLOBTN(d)+SETBTN)}<div class="row grow" style="gap:44px;align-items:center"><div style="flex:.8;text-align:center">${pal(d.ch,400,d.bye?'happy':'normal',d.g)}<div class="chip" style="margin-top:6px">${tagOf(d)}</div></div>
+   <div style="flex:1.5"><div class="say l"><div class="who">${esc(d.fname)}</div><div class="hl" style="font-size:76px">${esc(d.msg1)}</div><div class="bd" style="font-size:36px;margin-top:16px">${esc(d.msg2)}</div></div>
+   ${d.canAsk?`<div class="row" style="margin-top:24px"><div class="btn ghost tap" onclick="go('asknow')">지금 한 단어 남기기</div></div>`:''}</div></div>`,
+ companion:d=>`${hdr(d,'같이 타고 있어요')}<div class="row grow" style="gap:44px;align-items:center"><div style="flex:.8;text-align:center"><span class="hopper">${pal(d.ch,400,'happy',d.g)}</span><div class="chip" style="margin-top:6px">${tagOf(d)}</div></div>
+   <div style="flex:1.5"><div class="say l"><div class="who">${esc(d.fname)}</div><div class="hl" style="font-size:84px">오늘은 같이 가는 날</div><div class="bd" style="font-size:34px;margin-top:14px">오늘은 옆자리와 즐겁게 가세요.</div></div>
+   <div class="row" style="margin-top:26px"><div class="btn tap" onclick="go('pickgo')">옆자리 친구 만나기</div><div class="btn ghost tap" id="solo" style="font-size:26px">${esc(d.soloLabel||'혼자예요')}</div></div></div></div>`,
+ pick:d=>`${hdr(d,'둘이 탑승 · 조합 도감 '+d.dex+'/15')}<div class="hl" style="font-size:72px">옆자리는 무슨 띠예요?</div><div class="bd" style="color:#4b5260;margin-top:6px">생일은 안 물어봐요 · 오늘만 쓰고 저장하지 않아요</div>
+   <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:16px;margin-top:26px">${ANI.map((a,i)=>`<div class="cd tap" onclick="go('pick:${i}')" style="text-align:center;padding:12px 0 16px;background:${PASTEL[AEL[i]]}"><div style="display:grid;place-items:center">${mo(a,150,'normal',0)}</div><b style="font-size:30px">${a}</b></div>`).join('')}</div>
+   <div class="row" style="margin-top:22px"><div class="btn ghost tap" style="flex:1" onclick="go('ok')">오늘은 그냥 갈래요</div></div>`,
+ combo:d=>{const a=d.me.el,b=AEL[d.partner],c=combo(a,b),pn=ANI[d.partner];
+  return `${hdr(d,'둘이 탑승 · 조합 도감 '+d.dex+'/15')}<div class="row grow" style="gap:14px;align-items:center">
+   <div style="text-align:center;flex:none"><span class="joyer">${pal(d.ch,230,'happy',d.g)}</span><div><span class="chip">${esc(d.fname)} · 나</span></div></div>
+   <div class="hl" style="font-size:70px;flex:none">+</div>
+   <div style="text-align:center;flex:none"><span class="joyer" style="animation-delay:.2s">${pal(pn,230,'happy',0)}</span><div><span class="chip">옆자리 · ${NAME[b]} ${pn}띠</span></div></div>
+   <div class="grow" style="margin-left:26px;min-width:0"><div class="say l"><div class="who">${esc(d.fname)} · 오늘의 조합</div><div class="hl" style="font-size:76px;white-space:nowrap">${c[0]}</div><div class="bd" style="font-size:32px;margin-top:8px">${c[1]}</div></div>
+   <div class="cd" style="margin-top:18px"><div class="lb">오늘의 미션</div><b style="font-size:38px">${c[2]}</b></div>
+   <div class="row" style="margin-top:20px"><div class="btn tap" onclick="go('ok')">좋아요</div></div>
+   <div class="lb" style="margin-top:14px;font-weight:400">"안 맞는 조합"은 없어요</div></div></div>`},
+ gate:d=>`${hdr(d,'내 기록'+(d.passenger?' · 동승자 있음':''))}<div class="row grow" style="gap:44px;align-items:center"><div style="flex:.8;text-align:center">${pal(d.ch,400,'normal',d.g)}<div class="chip" style="margin-top:6px">${tagOf(d)}</div></div>
+   <div style="flex:1.5"><div class="say l"><div class="who">${esc(d.fname)}</div><div class="hl" style="font-size:76px">${d.passenger?'기록은 혼자일 때만<br>열려요':'지난 마음 기록을<br>열어 볼까요?'}</div><div class="bd" style="font-size:34px;margin-top:14px">${d.passenger?'옆에 누가 타고 있어요.':'화면에 그동안 고른 마음 단어가 보여요.'}</div></div>
+   <div class="row" style="margin-top:26px">${d.passenger?'':`<div class="btn tap" id="open">혼자예요, 열기</div>`}<div class="btn ghost tap" onclick="go('later')">${d.passenger?'돌아가기':'다음에'}</div></div></div></div>`,
+ week:d=>`${hdr(d,'내 기록 · 지난 7일')}<div class="row" style="align-items:center;gap:30px"><div class="grow"><div class="bd" style="color:#4b5260">${esc(d.name)}님의 지난 7일</div><div class="hl" style="font-size:72px">타면 탈수록, 나를 알아가요</div></div>
+   ${d.grew?`<div class="cd" style="display:flex;align-items:center;gap:6px;padding:10px 26px 10px 14px;background:${PASTEL[d.myEl]}"><span style="opacity:.5">${mo(d.animal,110,'normal',0)}</span><span class="tt">→</span><span class="joyer">${pal(d.animal,170,'happy',1)}</span><div style="margin-left:10px"><div class="tt">${esc(d.fname)}가 조금 자랐어요!</div><div class="lb">함께 탄 날이 일주일이 됐어요</div></div></div>`:`<div style="text-align:center">${pal(d.ch,170,'normal',d.g)}</div>`}</div>
+   <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:14px;margin-top:26px">${d.days.map(x=>`<div class="cd" style="text-align:center;padding:8px 4px 16px;background:${PASTEL[x.el]||'#fff'}"><div style="display:grid;place-items:center;${x.tag==='-'?'opacity:.3':''}">${mo(d.ch,160,MOOD[x.tag]||'normal',d.g)}</div><div class="lb" style="margin-top:2px">${x.w}</div><b style="font-size:${x.tag.length>5?23:27}px;margin-top:2px"><span style="color:${EMO[x.tag]||'#c9ced6'}">●</span> ${esc(x.tag)}</b></div>`).join('')}</div>
+   <div class="say n" style="margin-top:22px;padding:28px 36px"><div class="who">${esc(d.fname)}</div><div class="tt">${esc(d.s1)}</div>${d.s2?`<div class="bd" style="margin-top:8px;color:#4b5260">${esc(d.s2)}</div>`:''}</div>
+   <div class="row" style="margin-top:14px;align-items:center"><div class="btn ghost tap" style="height:76px" onclick="go('later')">닫기</div>${d.demo?'<div class="lb" style="font-weight:400;align-self:center">시연용 예시 기록 포함</div>':''}</div>`,
+ road:d=>`${hdr(d,'주차 뒤 · 오늘 지나온 길')}<div class="row grow" style="gap:44px;align-items:center"><div style="flex:.8;text-align:center"><span class="joyer">${pal(d.ch,400,'happy',d.g)}</span><div class="chip" style="margin-top:6px">${tagOf(d)}</div></div>
+   <div style="flex:1.5"><div class="say l"><div class="who">${esc(d.fname)}</div>${gline(d)}<div class="hl" style="font-size:68px">오늘도 조심히 지나왔어요</div><div class="bd" style="margin-top:8px;color:#4b5260">${d.tripBok?`복 +${d.tripBok} · 모은 복 ${d.bok}`:`오늘의 복은 이미 받았어요 · 모은 복 ${d.bok}`}</div></div>
+   ${d.events.map(e=>`<div class="cd" style="margin-top:12px;display:flex;justify-content:space-between;align-items:center;padding:18px 28px"><b style="margin:0">${esc(e.k)}</b><span class="lb">${e.n}곳 지나왔어요</span></div>`).join('')}
+   <div class="row" style="margin-top:22px"><div class="btn tap" onclick="go('ok')">좋아요</div></div>
+   <div class="lb" style="margin-top:14px;font-weight:400">복은 하루 한 번, 운행을 마치면 쌓여요 · 횟수나 속도로 겨루지 않아요</div></div></div>`,
+ myfriend:d=>{const forms=[[0,'처음 만난 모습','처음부터'],[1,'조금 자란 모습','함께 탄 날 7일'],[2,'다 자란 모습','함께 탄 날 60일']];const zod=d.animal,isG=!!G[d.ch];
+  return `${hdr(d,'내 친구 · 모은 복 '+d.bok)}<div class="row grow" style="gap:36px;align-items:center"><div style="flex:.72;text-align:center"><div class="hero" style="background:${PASTEL[d.myEl]||'#eef0f3'};height:520px"><span class="hopper">${pal(d.ch,320,'happy',d.g)}</span><div class="chip" style="margin-top:6px">${tagOf(d)}</div></div>
+   <div class="row" style="margin-top:14px;justify-content:center;align-items:center"><input id="fn" value="${esc(d.fname)}" maxlength="8" style="width:210px;font-size:28px;padding:14px 18px"><div class="btn ghost tap" style="height:70px;font-size:24px;padding:0 22px" onclick="go('rename:'+document.getElementById('fn').value)">이름 바꾸기</div></div></div>
+   <div style="flex:1.5"><div class="tt">${isG?zod+'띠 친구 모습 고르기':'모습 고르기'}</div><div class="lb" style="font-weight:400">함께 탄 날 ${d.rides}일 · 자란 뒤에도 예전 모습으로 둘 수 있어요</div>
+   <div class="row" style="margin-top:12px">${forms.map(([g,a,b])=>{const ok=g<=d.gMax,on=!isG&&d.g===g;return `<div class="cd ${ok?'tap':''}" ${ok?`onclick="go('form:${g}')"`:''} style="flex:1;text-align:center;padding:8px 6px 14px;${on?'border:3px solid #2b221c;':''}"><div style="display:grid;place-items:center;${ok?'':'opacity:.4'}">${mo(zod,124,'normal',g)}</div><b style="font-size:24px">${a}</b><div class="lb" style="font-size:22px">${ok?(on?'지금 모습':'고르기'):Math.max(1,(g===1?7:60)-d.rides)+'일 더 타면'}</div></div>`}).join('')}</div>
+   <div class="tt" style="margin-top:22px">수호 친구</div><div class="lb" style="font-weight:400">복 150으로 만나요 · 만난 뒤에는 띠 친구와 번갈아 탈 수 있어요</div>
+   <div class="row" style="margin-top:12px;gap:12px"><div class="cd tap" onclick="go('kind:')" style="flex:1;text-align:center;padding:8px 2px 14px;${!isG?'border:3px solid #2b221c':''}"><div style="display:grid;place-items:center">${mo(zod,100,'normal',d.gMax)}</div><b style="font-size:22px">${zod}띠 친구</b><div class="lb" style="font-size:22px">${!isG?'함께 타는 중':'고르기'}</div></div>
+   ${['청룡','주작','해태','백호','현무'].map(n=>{const own=d.owned.includes(n),on=d.ch===n,can=d.bok>=150;return `<div class="cd ${own||can?'tap':''}" ${own||can?`onclick="go('kind:${n}')"`:''} style="flex:1;text-align:center;padding:8px 2px 14px;${on?'border:3px solid #2b221c;':''}"><div style="display:grid;place-items:center;${own||can?'':'opacity:.4'}">${mo(n,100,'normal',1)}</div><b style="font-size:22px">${n}</b><div class="lb" style="font-size:22px">${on?'함께 타는 중':own?'고르기':can?(d.pendingBuy===n?'한 번 더!':'만나기'):'복 150'}</div></div>`}).join('')}</div>
+   <div class="row" style="margin-top:20px"><div class="btn ghost tap" onclick="go('back')">돌아가기</div><div class="btn ghost tap" onclick="go('settings')">설정</div></div></div></div>`},
+ talkask:d=>`${hdr(d,'마음 대화 · 주차 중에만')}<div class="row grow" style="gap:44px;align-items:center"><div style="flex:.8;text-align:center">${pal(d.ch,400,'normal',d.g)}<div class="chip" style="margin-top:6px">${tagOf(d)}</div></div>
+   <div style="flex:1.5"><div class="say l"><div class="who">${esc(d.fname)}</div><div class="hl" style="font-size:68px">가장 마음에 걸린 건<br>뭐였어요?</div><div class="bd" style="margin-top:8px;color:#4b5260">하나만 골라 주세요. 말하고 싶지 않으면 넘어가도 돼요.</div></div>
+   <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-top:22px">${['일','사람','몸','모르겠어요'].map(a=>`<div class="emo tap" style="justify-content:center;font-size:${a.length>3?30:36}px" onclick="go('topic:${a}')">${a}</div>`).join('')}</div>
+   <div class="row" style="margin-top:18px"><div class="btn ghost tap" onclick="go('talkstop')">오늘은 여기까지 할게요</div></div>${FOOT}</div></div>`,
+ talkreply:d=>`${hdr(d,'마음 대화 · 주차 중에만')}<div class="row grow" style="gap:44px;align-items:center"><div style="flex:.8;text-align:center">${pal(d.ch,400,'relieved',d.g)}<div class="chip" style="margin-top:6px">${tagOf(d)}</div></div>
+   <div style="flex:1.5"><span class="chip">${esc(d.topic)}</span><div class="say l" style="margin-top:14px"><div class="who">${esc(d.fname)}</div><div class="tt" style="font-size:46px;line-height:1.32">${esc(d.line)}</div></div>
+   <div class="cd" style="margin-top:16px"><div class="lb">오늘 밤 작은 행동 하나</div><b>${esc(d.action)}</b></div>
+   <div class="row" style="margin-top:20px"><div class="btn tap" onclick="go('talkstop')">오늘은 여기까지</div><div class="btn ghost tap" onclick="go('talkkeep')">내일 아침에 한마디 더 듣기</div></div>${FOOT}</div></div>`,
+ mode:d=>{const sel=t=>d.theme===t?'<span class="chip" style="position:absolute;top:20px;right:20px;background:#2b221c;color:#fff;border-color:#2b221c">선택됨 ✓</span>':'';
+  const foot=d.wipeAsk?`<div class="cd" style="margin-top:18px;display:flex;align-items:center;gap:18px;border:2.5px solid #2b221c"><div class="grow"><b style="margin:0">정말 지울까요?</b><div class="lb" style="font-weight:400;margin-top:4px">이름 · 생일 · 마음 기록 · 친구 · 복이 모두 지워지고 되돌릴 수 없어요.</div></div><div class="btn ghost tap" style="color:#b3261e;border-color:#b3261e;margin-right:30px" onclick="go('wipe')">지우기</div><div class="btn tap" onclick="go('wipecancel')">그만두기</div></div>`
+   :`<div class="row" style="margin-top:18px;align-items:center"><div class="btn ghost tap" onclick="go('back')">돌아가기</div><div class="lb grow" style="font-weight:400;align-self:center;text-align:right">이름 · 생일 · 마음 기록은 이 차 안에만 저장돼요</div>${d.hasBirth?`<div class="btn ghost tap" style="font-size:26px" onclick="go('wipeask')">기록 지우고 처음부터</div>`:''}</div>`;
+  return `${hdr(d,'설정')}<div class="hl" style="font-size:64px">화면 모드 고르기</div><div class="bd" style="color:#4b5260;margin-top:4px">계산은 똑같아요. 보는 맛만 달라요.</div>
+  <div class="row" style="margin-top:20px;gap:22px">
+   <div class="cd tap" onclick="go('theme:friend')" style="flex:1;height:440px;position:relative;background:${PASTEL[d.myEl]||'#eef0f3'};padding:32px"><div class="lb">캐릭터 모드 · 기본</div><div class="tt" style="font-size:44px;margin-top:8px">내 띠 친구가<br>오늘을 알려 줘요</div><div style="position:absolute;right:16px;bottom:6px"><span class="hopper">${pal(d.ch,250,'happy',d.g)}</span></div>${sel('friend')}</div>
+   <div class="cd tap" onclick="go('theme:calm')" style="flex:1;height:440px;position:relative;overflow:hidden;background:#0b1530;border:0;padding:32px;color:#fff"><div style="position:absolute;inset:0;background:radial-gradient(circle at 75% 30%,#3d7bd9 0,transparent 45%),radial-gradient(circle at 92% 85%,#56c2d6 0,transparent 40%),radial-gradient(circle at 15% 95%,#2a3f8f 0,transparent 50%)"></div><div style="position:relative"><div class="lb" style="color:#c9d4f0">차분 모드</div><div style="font-size:46px;font-weight:400;margin-top:130px;line-height:1.2">물의 기운,<br><b style="font-weight:800">서두르지 않아도<br>괜찮아요.</b></div></div>${sel('calm')}</div>
+   <div class="cd tap" onclick="go('theme:kitsch')" style="flex:1;height:440px;position:relative;background:#ffd43b;border:5px solid #16130f;box-shadow:8px 8px 0 #16130f;padding:32px"><div class="lb" style="color:#16130f">키치 모드</div><div style="font-size:68px;font-weight:800;margin-top:10px;line-height:1.1">기운 배달<br>왔습니다~</div><div class="bd" style="position:absolute;left:32px;bottom:26px;font-weight:600">말투도 고를 수 있어요<br>순한맛 ↔ 매운맛</div>${sel('kitsch')}</div></div>${foot}`},
+};
+function sendSetup(){const v=id=>document.getElementById(id).value,p=n=>String(n).padStart(2,'0');
+ if(!v('nm').trim()){document.getElementById('nm').focus();return;}
+ const last=new Date(+v('by'),+v('bm'),0).getDate(),day=Math.min(+v('bd'),last);
+ go('setup:'+v('nm').replace(/\|/g,'')+'|'+v('by')+'-'+p(v('bm'))+'-'+p(day));}
+// 내용이 한 화면보다 길면(어제 얘기·첫날 인사가 붙는 날 등) 화면 틀을 조금 넓혀 그만큼 작게 그려서 한 화면에 다 들어가게 한다
+function fit(k){k=k||1;const f=document.getElementById('f');const z=Math.min(innerWidth/1400,innerHeight/1007)/k;f.style.width=(1400*k)+'px';f.style.height=(1007*k)+'px';f.style.transform='scale('+z+')';f.style.transformOrigin='0 0';}
+addEventListener('contextmenu',e=>e.preventDefault());
+function render(d){fit();const F=document.getElementById('f');F.innerHTML=(V[d.scene]||V.hello)(d);if(F.scrollHeight>1007+2)fit(Math.min(1.25,F.scrollHeight/1007));
+ const o=document.getElementById('open');
+ if(o) o.onclick=()=>go('open');
+ const so=document.getElementById('solo');
+ if(so){ if(!d.passenger) so.onclick=()=>go('withme'); else if(d.soloLong){let t;so.ontouchstart=so.onmousedown=()=>{t=setTimeout(()=>go('solo'),1200)};so.ontouchend=so.onmouseup=so.ontouchcancel=()=>clearTimeout(t);} else so.onclick=()=>go('solo'); }}
+// 앱 밖(브라우저)에서 미리 보기: friend.html?demo=<JSON>
+try{const q=new URLSearchParams(location.search).get('demo');if(q)addEventListener('load',()=>render(JSON.parse(q)));}catch(e){}
+</script></body></html>
