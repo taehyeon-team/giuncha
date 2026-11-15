@@ -456,6 +456,7 @@ class MainActivity : Activity() {
 
     private fun render() {
         if (destroyed) return
+        hideKeyboard()
         stage.removeAllViews()
         if (store.birth == null && scene != Scene.SETUP && scene != Scene.MODE) scene = Scene.SETUP
         if (store.birth != null) store.markRide(store.today())
@@ -1087,6 +1088,14 @@ class MainActivity : Activity() {
         stage.addView(w, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
         val json = webData().toString()
         if (file in webReady) w.evaluateJavascript("render($json)", null) else pendingJson[file] = json
+    }
+
+    private fun hideKeyboard() {   // 화면이 바뀌면 열려 있던 글자판을 닫는다
+        try {
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+            window?.decorView?.windowToken?.let { imm.hideSoftInputFromWindow(it, 0) }
+            currentFocus?.clearFocus()
+        } catch (_: Exception) { }
     }
 
     private fun onWeb(a: String) {

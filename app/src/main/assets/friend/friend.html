@@ -37,18 +37,18 @@ input,select{font-family:'Pre',sans-serif;font-size:34px;font-weight:600;color:#
 @keyframes hop{0%,74%,100%{transform:translateY(0) rotate(0) scale(1,1)}79%{transform:translateY(-44px) rotate(-7deg) scale(.97,1.04)}84%{transform:translateY(0) scale(1.07,.93)}89%{transform:translateY(-28px) rotate(6deg) scale(.98,1.03)}94%{transform:translateY(0) scale(1.05,.95)}}
 @keyframes joy{0%,100%{transform:translateY(0) scale(1,1)}30%{transform:translateY(-34px) scale(.96,1.05)}60%{transform:translateY(0) scale(1.08,.92)}}
 @keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
-@keyframes blink{0%,91%,100%{opacity:0}93%,97%{opacity:1}}
-@keyframes unblink{0%,91%,100%{opacity:1}93%,97%{opacity:0}}
-.live{position:relative;display:inline-block;transform-origin:50% 92%}
-.live .b{position:absolute;left:0;top:0;opacity:0}
+@keyframes blink{0%,92%,100%{visibility:hidden}93%,97%{visibility:visible}}
+@keyframes unblink{0%,92%,100%{visibility:visible}93%,97%{visibility:hidden}}
+.live{position:relative;display:inline-block;transform-origin:50% 92%;will-change:transform;backface-visibility:hidden}
+.live .b{position:absolute;left:0;top:0;visibility:hidden}
 .live.on{animation:breathe 2.6s ease-in-out infinite}
-.live.on .a{animation:unblink 4.6s linear infinite}.live.on .b{animation:blink 4.6s linear infinite}
-.hopper{display:inline-block;transform-origin:50% 92%;animation:hop 7s ease-in-out infinite}
+.live.on .a{animation:unblink 4.6s steps(1,end) infinite}.live.on .b{animation:blink 4.6s steps(1,end) infinite}
+.hopper{display:inline-block;transform-origin:50% 92%;animation:hop 7s ease-in-out infinite;will-change:transform}
 .joyer{display:inline-block;transform-origin:50% 92%;animation:joy .9s ease-in-out 3}
 .popin{display:inline-block;transform-origin:50% 92%;animation:pop .5s ease-out both}
 </style></head><body><div id="f"></div>
 <script>
-const go=a=>{try{Android.on(a)}catch(e){console.log(a)}};
+const go=a=>{try{const ae=document.activeElement;if(ae&&ae.blur)ae.blur();}catch(e){}try{Android.on(a)}catch(e){console.log(a)}};
 const OL='#5a4636',DK='#3b2d24',W='#fffdf8';
 const PASTEL={목:'#d9f3e6',화:'#ffe1d6',토:'#fff0c9',금:'#e9edf3',수:'#dbe9ff'};
 const P=(d,f=W,w=5,st=OL)=>`<path d="${d}" fill="${f}" stroke="${st}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"/>`;
@@ -155,7 +155,7 @@ const V={
  setup:d=>{const [y,m,dd]=d.birth.split('-').map(Number);const opt=(a,b,sel,suf)=>{let h='';for(let i=a;i<=b;i++)h+=`<option value="${i}"${i===sel?' selected':''}>${i}${suf}</option>`;return h;};
   return `<div class="row grow" style="gap:60px;align-items:center"><div style="flex:1.15">
    <div class="hl" style="font-size:132px;line-height:1">기운차</div><div class="bd" style="font-size:38px;margin-top:14px;color:#4b5260">타면 탈수록 나를 알아가는 차</div>
-   <div class="lb" style="margin-top:44px">부를 이름 (별명도 괜찮아요)</div><input id="nm" value="${esc(d.name)}" maxlength="8" style="width:520px;margin-top:10px">
+   <div class="lb" style="margin-top:44px">부를 이름 (별명도 괜찮아요)</div><input id="nm" value="${esc(d.name)}" maxlength="8" enterkeyhint="done" style="width:520px;margin-top:10px">
    <div class="lb" style="margin-top:30px">생년월일 (양력)</div>
    <div class="row" style="margin-top:10px"><select id="by">${opt(1940,2015,y,'년')}</select><select id="bm">${opt(1,12,m,'월')}</select><select id="bd">${opt(1,31,dd,'일')}</select></div>
    <div class="lb" style="margin-top:16px;font-weight:400;line-height:1.5">생년월일은 띠와 오늘의 색을 고르는 데만 써요. 태어난 시각은 몰라도 괜찮아요.<br>이름 · 생년월일 · 고른 한 단어는 이 차 안에만 남고, 설정에서 언제든 지울 수 있어요.</div>
@@ -170,7 +170,7 @@ const V={
    <div style="margin-top:22px"><span class="chip">${d.animal}띠</span> <span class="chip">태어난 날의 기운 · ${esc(d.myWord||'')}</span></div>
    <div class="lb" style="margin-top:14px;font-weight:400">재미로 보는 풀이예요. 맞지 않아도, 따르지 않아도 괜찮아요.</div>
    <div class="say l" style="margin-top:28px;padding:24px 30px"><div class="who">${d.animal}띠 친구</div><div class="tt">안녕! 나는 ${ya(BABY[d.animal]||d.animal)}. 나한테 이름을 지어 줄래?</div></div>
-   <div class="row" style="margin-top:18px;align-items:center"><input id="fn" value="${esc(d.fname)}" maxlength="8" style="width:360px"><div class="btn tap" onclick="go('fname:'+document.getElementById('fn').value)">시작하기</div></div>
+   <div class="row" style="margin-top:18px;align-items:center"><input id="fn" value="${esc(d.fname)}" maxlength="8" enterkeyhint="done" style="width:360px"><div class="btn tap" onclick="go('fname:'+document.getElementById('fn').value)">시작하기</div></div>
    <div class="lb" style="margin-top:16px;font-weight:400">함께 탄 날만큼 친구가 자라요. 첫 변화는 일주일 뒤예요.</div></div>
    <div style="flex:1"><div class="hero" style="background:${PASTEL[d.myEl]||'#eef0f3'};height:640px"><span class="popin"><span class="hopper">${pal(d.animal,520,'happy',0)}</span></span></div></div></div>`,
  morning:d=>{const el=d.element||'금';
@@ -247,7 +247,7 @@ const V={
    <div class="lb" style="margin-top:14px;font-weight:400">복은 하루 한 번, 운행을 마치면 쌓여요 · 횟수나 속도로 겨루지 않아요</div></div></div>`,
  myfriend:d=>{const forms=[[0,'처음 만난 모습','처음부터'],[1,'조금 자란 모습','함께 탄 날 7일'],[2,'다 자란 모습','함께 탄 날 60일']];const zod=d.animal,isG=!!G[d.ch];
   return `${hdr(d,'내 친구 · 모은 복 '+d.bok)}<div class="row grow" style="gap:36px;align-items:center"><div style="flex:.72;text-align:center"><div class="hero" style="background:${PASTEL[d.myEl]||'#eef0f3'};height:520px"><span class="hopper">${pal(d.ch,320,'happy',d.g)}</span><div class="chip" style="margin-top:6px">${tagOf(d)}</div></div>
-   <div class="row" style="margin-top:14px;justify-content:center;align-items:center"><input id="fn" value="${esc(d.fname)}" maxlength="8" style="width:210px;font-size:28px;padding:14px 18px"><div class="btn ghost tap" style="height:70px;font-size:24px;padding:0 22px" onclick="go('rename:'+document.getElementById('fn').value)">이름 바꾸기</div></div></div>
+   <div class="row" style="margin-top:14px;justify-content:center;align-items:center"><input id="fn" value="${esc(d.fname)}" maxlength="8" enterkeyhint="done" style="width:210px;font-size:28px;padding:14px 18px"><div class="btn ghost tap" style="height:70px;font-size:24px;padding:0 22px" onclick="go('rename:'+document.getElementById('fn').value)">이름 바꾸기</div></div></div>
    <div style="flex:1.5"><div class="tt">${isG?zod+'띠 친구 모습 고르기':'모습 고르기'}</div><div class="lb" style="font-weight:400">함께 탄 날 ${d.rides}일 · 자란 뒤에도 예전 모습으로 둘 수 있어요</div>
    <div class="row" style="margin-top:12px">${forms.map(([g,a,b])=>{const ok=g<=d.gMax,on=!isG&&d.g===g;return `<div class="cd ${ok?'tap':''}" ${ok?`onclick="go('form:${g}')"`:''} style="flex:1;text-align:center;padding:8px 6px 14px;${on?'border:3px solid #2b221c;':''}"><div style="display:grid;place-items:center;${ok?'':'opacity:.4'}">${mo(zod,124,'normal',g)}</div><b style="font-size:24px">${a}</b><div class="lb" style="font-size:22px">${ok?(on?'지금 모습':'고르기'):Math.max(1,(g===1?7:60)-d.rides)+'일 더 타면'}</div></div>`}).join('')}</div>
    <div class="tt" style="margin-top:22px">수호 친구</div><div class="lb" style="font-weight:400">복 150으로 만나요 · 만난 뒤에는 띠 친구와 번갈아 탈 수 있어요</div>
@@ -276,7 +276,14 @@ function sendSetup(){const v=id=>document.getElementById(id).value,p=n=>String(n
  const last=new Date(+v('by'),+v('bm'),0).getDate(),day=Math.min(+v('bd'),last);
  go('setup:'+v('nm').replace(/\|/g,'')+'|'+v('by')+'-'+p(v('bm'))+'-'+p(day));}
 // 내용이 한 화면보다 길면(어제 얘기·첫날 인사가 붙는 날 등) 화면 틀을 조금 넓혀 그만큼 작게 그려서 한 화면에 다 들어가게 한다
-function fit(k){k=k||1;const f=document.getElementById('f');const z=Math.min(innerWidth/1400,innerHeight/1007)/k;f.style.width=(1400*k)+'px';f.style.height=(1007*k)+'px';f.style.transform='scale('+z+')';f.style.transformOrigin='0 0';}
+let FZ=1,FK=1,FH=0;
+function fit(k){k=k||1;const f=document.getElementById('f');if(!FH||innerHeight>FH)FH=innerHeight;const z=Math.min(innerWidth/1400,FH/1007)/k;FZ=z;FK=k;f.style.width=(1400*k)+'px';f.style.height=(1007*k)+'px';f.style.transform='scale('+z+')';f.style.transformOrigin='0 0';}
+// 글자판(키보드): 입력칸이 가려지면 화면 전체를 그만큼 위로 올린다. 크기는 그대로 둔다
+function kb(){const f=document.getElementById('f'),ae=document.activeElement;if(!f)return;
+ if(ae&&ae.tagName==='INPUT'&&innerHeight<FH-80){f.style.transform='scale('+FZ+')';const pr=ae.parentElement,useRow=pr&&pr.querySelector('.btn')&&pr.getBoundingClientRect().height<220;const box=(useRow?pr:ae).getBoundingClientRect();const need=box.bottom-(innerHeight-130);f.style.transform=need>0?'translateY('+(-need)+'px) scale('+FZ+')':'scale('+FZ+')';}
+ else{f.style.transform='scale('+FZ+')';}}
+addEventListener('resize',()=>setTimeout(kb,60));addEventListener('focusin',()=>setTimeout(kb,300));addEventListener('focusout',()=>setTimeout(kb,60));
+addEventListener('keydown',e=>{if(e.key!=='Enter'||!e.target||e.target.tagName!=='INPUT')return;e.preventDefault();const t=e.target;t.blur();if(t.id==='nm')return;const b=t.parentElement&&t.parentElement.querySelector('.btn');if(b)b.click();});
 addEventListener('contextmenu',e=>e.preventDefault());
 function render(d){fit();const F=document.getElementById('f');F.innerHTML=(V[d.scene]||V.hello)(d);if(F.scrollHeight>1007+2)fit(Math.min(1.25,F.scrollHeight/1007));
  const o=document.getElementById('open');
