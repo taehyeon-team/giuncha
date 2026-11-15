@@ -83,11 +83,13 @@ class MainActivity : Activity() {
     private var seatsAsked = -1               // -1 아직 모름 · 0 이 차는 좌석 신호 없음 · n 살피는 자리 수
     private var byHand: Boolean? = null       // 운전자가 손으로 알려 준 값(true 같이 탔어요 / false 혼자예요). 그날만 쓴다
     private var byHandDay: LocalDate? = null
+    private var compDone = false              // 이번 탑승에서 동승 선택(조합 보기 · 내 카드만 · 혼자예요)을 이미 했는가
+    private var demoLeft = false              // 시연: 동승자가 내린 상태(좌석은 빈 것으로 보되, 운전자가 '혼자예요'를 누를 때까지 가림)
     private var hold = false                  // 누가 앉은 적이 있으면, 운전자가 '혼자예요'를 누르거나 빈 차로 다시 출발할 때까지 가린 채로 둔다
     private fun byHandNow(): Boolean? = if (byHandDay == store.today() && System.currentTimeMillis() - byHandAt < 3 * 3600_000L) byHand else null
     private fun seatsUnknown() = seatsAsked < 0 || seatOcc.size < seatsAsked
     /** 같이 탄 사람이 있는가. 가리는 것은 자동(모르면 가린다), 다시 여는 것은 운전자가 누를 때만 */
-    private val passenger: Boolean get() = passengerDemo ?: byHandNow() ?: ((hold && holdDay == store.today()) || seatsUnknown() || seatOcc.values.any { it })
+    private val passenger: Boolean get() = passengerDemo ?: byHandNow() ?: ((hold && holdDay == store.today()) || (!demoLeft && (seatsUnknown() || seatOcc.values.any { it })))
     private fun setByHand(v: Boolean) {
         if (passengerDemo != null) passengerDemo = v            // 시연 중에는 시연 값으로
         else { byHand = v; byHandDay = store.today(); byHandAt = System.currentTimeMillis(); if (!v) hold = false }
@@ -293,10 +295,10 @@ class MainActivity : Activity() {
         showHelp = false
         if (store.birth == null || scene == Scene.SETUP || scene == Scene.IDENTITY) { updateStatus(); return }
         if (passenger) {
+            compDone = false   // 새로 같이 탔다: 어떻게 볼지 한 번 묻는다
             when (scene) {
                 Scene.WEEK -> scene = Scene.GATE
-                Scene.EVENING_ASK, Scene.EVENING_REPLY, Scene.TALK_ASK, Scene.TALK_REPLY -> scene = Scene.COMPANION
-                Scene.EVENING_HELLO -> if (!helloBye) scene = parkedScene()
+                Scene.MORNING, Scene.EVENING_ASK, Scene.EVENING_REPLY, Scene.TALK_ASK, Scene.TALK_REPLY, Scene.EVENING_HELLO -> if (!isDriving(gear)) scene = parkedScene()
                 else -> {}
             }
         } else if ((scene == Scene.COMPANION || scene == Scene.PICK || scene == Scene.COMBO || (scene == Scene.EVENING_HELLO && !helloBye)) && !isDriving(gear)) {
@@ -307,6 +309,7 @@ class MainActivity : Activity() {
 
     /** 운전자가 '혼자예요'를 눌렀다: 가림을 풀고, 저녁이면 한 단어를 남길 수 있게 한다 */
     private fun soloNow() {
+        if (demoLeft) { demoLeft = false; passengerDemo = false }   // 시연에서 내린 뒤 '혼자예요' → 시연 혼자 상태로
         setByHand(false)
         showHelp = false
         if (!isDriving(gear) && scene != Scene.GATE && scene != Scene.MODE && scene != Scene.MYFRIEND) scene = parkedScene()
@@ -346,11 +349,14 @@ class MainActivity : Activity() {
 
     /** 주차했을 때 보여 줄 화면. 저녁에 오늘 한 단어를 이미 골랐으면 다시 묻지 않는다. */
     private fun parkedScene(): Scene {
-        if (!isEvening()) return Scene.MORNING
         if (passenger) {
-            if (passengerDemo == null && byHandNow() == null && !hold && seatsUnknown()) { helloBye = false; return Scene.EVENING_HELLO }   // 좌석 답을 기다리는 몇 초
-            return Scene.COMPANION
+            val waiting = passengerDemo == null && byHandNow() == null && !hold && seatsUnknown()   // 좌석 답을 기다리는 몇 초
+            if (waiting) { if (!isEvening()) return Scene.MORNING; helloBye = false; return Scene.EVENING_HELLO }
+            if (!compDone) return Scene.COMPANION
+            if (!isEvening()) return Scene.MORNING
+            helloBye = true; return Scene.EVENING_HELLO
         }
+        if (!isEvening()) return Scene.MORNING
         // 오늘 고른 단어와 답글은 고른 직후 한 번만 보여 준다. 그 뒤로는 조용한 마무리 인사.
         if (store.tagOn(store.today()) != null || store.skipDay == store.today().toString()) { helloBye = true; return Scene.EVENING_HELLO }
         // 한 단어는 집에 도착해 주차했을 때만 묻는다. 저녁에 막 탔을 때는 조용히 인사만.
@@ -686,7 +692,7 @@ class MainActivity : Activity() {
     }
 
     /** 자리에 무게가 잡혀 있는데(짐·빈 카시트) 혼자라고 알릴 때는 길게 눌러야 한다 */
-    private fun seatedNow() = passengerDemo == null && seatOcc.values.any { it }
+    private fun seatedNow() = passengerDemo == null && !demoLeft && seatOcc.values.any { it }
     private fun soloLabel() = if (!passenger) "동승자 있어요" else if (seatedNow()) "지금은 혼자예요 (길게 누르기)" else "혼자예요"
     private fun soloClick(v: View) {
         if (!passenger) v.setOnClickListener { setByHand(true); onPassengerChanged() }
@@ -906,8 +912,19 @@ class MainActivity : Activity() {
         col({
             chip("같이 타고 있어요")
             t(twoWeight("오늘은 ", "같이 가는 날"), 110f, fBold, top = 24)
-            t("오늘은 옆자리와 즐겁게 가세요.", 34f, fLight, alpha = .9f, top = 24)
-            pill("옆자리 조합 보기", Pal.fire.acc, Color.parseColor("#2a1206"), top = 50) { scene = Scene.PICK; render() }
+            t("어떻게 볼까요? 옆자리와 조합을 같이 보거나, 내 카드만 조용히 볼 수 있어요.", 34f, fLight, alpha = .9f, top = 24)
+            val row = LinearLayout(this@MainActivity).apply { gravity = Gravity.CENTER_VERTICAL }
+            row.addView(Button(this@MainActivity).apply {
+                text = "옆자리 조합 보기"; isAllCaps = false; typeface = fMed; setTextSize(TypedValue.COMPLEX_UNIT_SP, 28f); setTextColor(Color.parseColor("#2a1206"))
+                background = GradientDrawable().apply { cornerRadius = 999f; setColor(Pal.fire.acc) }; stateListAnimator = null; setPadding(dp(44), dp(18), dp(44), dp(18))
+                setOnClickListener { scene = Scene.PICK; render() }
+            })
+            row.addView(Button(this@MainActivity).apply {
+                text = "내 카드만 조용히"; isAllCaps = false; typeface = fMed; setTextSize(TypedValue.COMPLEX_UNIT_SP, 26f); setTextColor(Color.WHITE)
+                background = GradientDrawable().apply { cornerRadius = 999f; setColor(Color.argb(40, 255, 255, 255)) }; stateListAnimator = null; setPadding(dp(40), dp(18), dp(40), dp(18))
+                setOnClickListener { compDone = true; scene = parkedScene(); render() }
+            }, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { leftMargin = dp(16) })
+            addView(row, LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply { topMargin = dp(40) })
             addView(TextView(this@MainActivity).apply {
                 text = soloLabel(); typeface = fMed; setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f); setTextColor(Color.WHITE); alpha = .75f
                 background = glassBg(999, 20); setPadding(dp(30), dp(14), dp(30), dp(14)); soloClick(this)
@@ -1008,7 +1025,7 @@ class MainActivity : Activity() {
                     }
                 }
                 o.put("scene", "week").put("days", arr).put("s1", s1).put("s2", s2).put("demo", days.any { store.demoFilled(it) })
-                    .put("grew", store.rideCount() >= 7)
+                    .put("grew", store.rideCount() in 7..13)   // 자란 그 주에만 알려 준다
             }
             Scene.ROAD -> {
                 val arr = org.json.JSONArray()
@@ -1022,11 +1039,11 @@ class MainActivity : Activity() {
                 o.put("scene", "talkreply").put("topic", tp).put("line", TALK.getValue(tp).first).put("action", TALK.getValue(tp).second)
             }
             Scene.MODE -> o.put("scene", "mode").put("wipeAsk", wipeAsk).put("hasBirth", store.birth != null)
-            Scene.PICK -> o.put("scene", "pick")
-            Scene.COMPANION -> o.put("scene", "companion")
+            Scene.PICK -> o.put("scene", "pick").put("calm", !friend() && !kitsch())
+            Scene.COMPANION -> o.put("scene", "companion").put("evening", isEvening())
             Scene.COMBO -> {
                 val id = engine.identity(store.birth!!)
-                o.put("scene", "combo").put("partner", partner)
+                o.put("scene", "combo").put("partner", partner).put("calm", !friend() && !kitsch())
                     .put("me", org.json.JSONObject().put("el", id.element).put("animal", id.animal))
             }
             Scene.GATE -> o.put("scene", "gate")
@@ -1105,6 +1122,7 @@ class MainActivity : Activity() {
             a == "more" -> { detailOpen = true; render() }
             a == "fold" -> { detailOpen = false; render() }
             a == "pickgo" -> { scene = Scene.PICK; render() }
+            a == "quiet" -> { compDone = true; scene = parkedScene(); render() }   // 내 카드만 조용히
             a == "asknow" -> askNow()
             a == "grewok" -> { store.seenStage = stageMax(); render() }
             a == "withme" -> { setByHand(true); onPassengerChanged() }
@@ -1136,7 +1154,8 @@ class MainActivity : Activity() {
                 Scene.DESTINY -> { scene = parkedScene(); render() }
                 Scene.ROAD -> { lastTrip.clear(); scene = parkedScene(); render() }
                 Scene.EVENING_ASK -> { store.skipDay = store.today().toString(); helloBye = true; scene = Scene.EVENING_HELLO; render() }
-                Scene.PICK, Scene.COMBO, Scene.EVENING_REPLY, Scene.COMPANION -> { helloBye = true; scene = Scene.EVENING_HELLO; render() }
+                Scene.PICK, Scene.COMBO, Scene.COMPANION -> { compDone = true; scene = parkedScene(); render() }
+                Scene.EVENING_REPLY -> { helloBye = true; scene = Scene.EVENING_HELLO; render() }
                 else -> {}
             }
             a.startsWith("setup:") && isDriving(gear) -> {}
@@ -1208,15 +1227,24 @@ class MainActivity : Activity() {
         b("방지턱") { road("방지턱", "앞에 방지턱이 있어요.") }
         gap()
         b("퇴근 도착 P") { eveningOverride = true; detailOpen = false; drove = true; onGear(VehicleGear.GEAR_PARK, "시연") }   // 시연: 달려서 집에 도착한 것으로
-        b("다음 날 →") { store.dayOffset = store.dayOffset + 1; lastReply = null; drove = false; eveningOverride = false; detailOpen = false; scene = Scene.MORNING; render() }
+        b("다음 날 →") { store.dayOffset = store.dayOffset + 1; lastReply = null; drove = false; eveningOverride = false; detailOpen = false
+            passengerDemo = passengerDefault(); demoLeft = false; byHand = null; byHandDay = null; hold = false; compDone = false; partner = -1   // 새 날은 혼자 탄 아침부터
+            scene = Scene.MORNING; render() }
         gap()
-        b("7일 뒤 →") { fillDemoWeek(); store.dayOffset = store.dayOffset + 6; detailOpen = false; scene = Scene.GATE; render() }
+        b("7일 뒤 →") { fillDemoWeek(); store.dayOffset = store.dayOffset + 6; detailOpen = false
+            passengerDemo = passengerDefault(); demoLeft = false; byHand = null; byHandDay = null; hold = false; compDone = false; partner = -1   // 날이 바뀌면 동승 상태도 새로
+            scene = Scene.GATE; render() }
         // 동승: 혼자(시연) → 같이(시연) → 자동(차량 좌석 신호) 순서로 바뀐다
         gap()
         passBtn = b("동승 태우기 →") {
             val before = passenger
-            passengerDemo = when (passengerDemo) { false -> true; true -> null; null -> false }
-            if (passenger != before) onPassengerChanged() else updateStatus()
+            when {
+                passengerDemo == false -> passengerDemo = true
+                passengerDemo == true -> { passengerDemo = null; demoLeft = false }
+                !demoLeft -> { demoLeft = true; hold = true; holdDay = store.today() }   // 내렸다: 실제 차처럼 운전자가 '혼자예요'를 누를 때까지 가린다
+                else -> { demoLeft = false; passengerDemo = false; byHand = null; byHandDay = null; hold = false }
+            }
+            if (passenger != before) onPassengerChanged() else render()
         }
         gap()
         b("내 친구") { if (store.birth != null) { scene = Scene.MYFRIEND; render() } }
@@ -1229,7 +1257,7 @@ class MainActivity : Activity() {
 
     /** 저장된 것을 지운 뒤, 앱이 기억하던 상태도 처음으로 돌린다 */
     private fun resetState() {
-        passengerDemo = passengerDefault(); byHand = null; byHandDay = null; partner = -1; lastReply = null; showHelp = false; drove = false; arrivedOn = null
+        passengerDemo = passengerDefault(); demoLeft = false; compDone = false; byHand = null; byHandDay = null; partner = -1; lastReply = null; showHelp = false; drove = false; arrivedOn = null
         tripEvents.clear(); lastTrip.clear(); seenRoadIds.clear(); roadLine = null; tripBok = 0; tripNote = 0; talkTopic = null; wordBok = 0
         helloBye = false; wipeAsk = false; eveningOverride = null; destiny = null; detailOpen = false; scene = Scene.SETUP
     }
@@ -1250,8 +1278,8 @@ class MainActivity : Activity() {
         val g = when (gear) { VehicleGear.GEAR_PARK -> "P"; VehicleGear.GEAR_DRIVE -> "D"; VehicleGear.GEAR_REVERSE -> "R"; VehicleGear.GEAR_NEUTRAL -> "N"; else -> "?" }
         val off = if (store.dayOffset != 0L) " (+${store.dayOffset}일)" else ""
         val seated = seatOcc.values.count { it }
-        val who = (if (passenger) "동승" else "혼자") + (if (passengerDemo != null) "(시연)" else "(좌석 신호 ${seated}자리)")
-        if (::passBtn.isInitialized) passBtn.text = when (passengerDemo) { false -> "동승 태우기 →"; true -> "동승: 좌석 신호로 →"; null -> "동승 내리기 →" }
+        val who = (if (passenger) "동승" else "혼자") + (if (passengerDemo != null) "(시연)" else if (demoLeft) "(시연: 내림 · 가린 채)" else "(좌석 신호 ${seated}자리)")
+        if (::passBtn.isInitialized) passBtn.text = when { passengerDemo == false -> "동승 태우기 →"; passengerDemo == true -> "동승: 좌석 신호로 →"; !demoLeft -> "동승 내리기 →"; else -> "시연 혼자로 →" }
         status.text = "시연 모드 · $who · 기어 $g · ${store.today()}$off · 장면 ${scene.name}  (길게 누르면 녹화 모드)"
     }
 

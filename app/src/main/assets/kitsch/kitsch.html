@@ -126,8 +126,9 @@ const V={
   <div class="row" style="align-items:center"><div style="flex:1.4"><div class="dh" style="font-size:118px;line-height:1.08">${d.msg1}</div><div style="font-size:44px;margin-top:30px;line-height:1.35">${d.msg2}</div>${d.canAsk?`<div class="row" style="margin-top:36px"><div class="btn tap" style="flex:1;background:var(--yel)" onclick="go('asknow')">지금 한 단어 남기기</div></div>`:''}<div class="row" style="margin-top:22px"><div class="btn tap" id="solo" style="flex:0 0 380px;background:#fff;font-size:28px">${d.soloLong?'혼자예요 (길게 꾹~)':d.soloLabel}</div><div class="btn tap" style="flex:0 0 200px;background:#eee;font-size:28px" onclick="go('settings')">설정</div></div></div>
   <div style="flex:1;text-align:center;transform:rotate(5deg)">${mascot('수',360)}</div></div>`,
  companion:d=>`${hdr('같이 타고 있어요','')}
-  <div class="row" style="align-items:center"><div style="flex:1.4"><div class="dh" style="font-size:130px;line-height:1.05">오늘은<br>같이 가는 날!</div><div style="font-size:44px;margin-top:26px">옆자리와 즐겁게 가세요.</div>
-  <div class="row" style="margin-top:40px"><div class="btn tap" style="flex:1.2;background:var(--yel)" onclick="go('pickgo')">옆자리 조합 보기</div><div class="btn tap" id="solo" style="flex:1;background:#fff;font-size:30px">${d.soloLong?'혼자예요 (길게 꾹~)':d.soloLabel}</div></div></div>
+  <div class="row" style="align-items:center"><div style="flex:1.4"><div class="dh" style="font-size:130px;line-height:1.05">오늘은<br>같이 가는 날!</div><div style="font-size:42px;margin-top:26px">어떻게 볼까요? 둘이 조합 보기, 아니면 내 카드만!</div>
+  <div class="row" style="margin-top:40px"><div class="btn tap" style="flex:1.2;background:var(--yel)" onclick="go('pickgo')">옆자리 조합 보기</div><div class="btn tap" style="flex:1;background:#fff" onclick="go('quiet')">내 카드만 조용히</div></div>
+  <div style="margin-top:22px"><span class="btn tap" id="solo" style="display:inline-block;background:#fff;font-size:28px;padding:14px 40px">${d.soloLong?'혼자예요 (길게 꾹~)':d.soloLabel}</span></div></div>
   <div style="flex:1;text-align:center;transform:rotate(5deg)">${mascot('화',360)}</div></div>`,
  mode:d=>'',
 };
